@@ -1,0 +1,145 @@
+<apex:page showHeader="false" sidebar="false">
+    <head>
+    	<apex:stylesheet value="{!urlfor($Resource.full_calendar, '/fullcalendar-3.0.1/fullcalendar.css')}"/>
+        <apex:includeScript value="{!urlfor($Resource.full_calendar, '/fullcalendar-3.0.1/lib/jquery.min.js')}"/>
+        <apex:includeScript value="{!urlfor($Resource.full_calendar, '/fullcalendar-3.0.1/lib/moment.min.js')}"/>
+        <apex:includeScript value="{!urlfor($Resource.full_calendar, '/fullcalendar-3.0.1/fullcalendar.js')}"/>
+        <apex:includeScript value="{!urlfor($Resource.full_calendar, '/fullcalendar-3.0.1/gcal.js')}"/>
+    </head>
+    
+    <body>
+    <div id="authorize-div" style="display: none">
+      <span>Authorize access to Google Calendar API</span>
+      <!--Button for the user to click to initiate auth sequence -->
+      <button id="authorize-button" onclick="handleAuthClick(event)">
+        Authorize
+      </button>
+    </div>
+    <pre id="output"></pre>
+    <div id='calendar'></div>
+        
+        
+        <script>
+        		var calendarEventsObject = [];
+            	var clientID = '687607039990-tpfj9bgr7r20vlgltoi070gji02egc9p.apps.googleusercontent.com';
+                var calendarScopes = ["https://www.googleapis.com/auth/calendar.readonly"];
+                
+                function checkAuth(){
+                    gapi.auth.authorize({
+                        'client_id' : clientID,
+                        'scope' : calendarScopes.join(' '),
+                        'immediate' :  true
+                    }, handleAuthResult);
+                }
+            
+                /**
+                 * handle response from auth server
+                 * 
+                 * @param {Object} result Authorization result.
+                 */
+                function handleAuthResult(result){
+                     var authorizeDiv = document.getElementById('authorize-div');
+                    if(result && !result.error){
+                        //authorize
+                        authorizeDiv.style.display = 'none';
+        
+                        loadCalendarAPI();
+                    }else{
+                        //not authorize
+                        authorizeDiv.style.display = 'inline';
+                    }
+                }
+            
+                /**
+                 * Load Google Calendar client library. List upcoming events
+                 * once client library is loaded.
+                 */
+                function loadCalendarAPI(){
+                    gapi.client.load('calendar', 'v3', listUpcomingEvents);
+                }
+            
+                /**
+                 * Print the summary and start datetime/date of the next ten events in
+                 * the authorized user's calendar. If no events are found an
+                 * appropriate message is printed.
+                 */
+                function listUpcomingEvents(){
+                    var request = gapi.client.calendar.events.list({
+                        'calendarId' : 'primary',
+                        'timeMin' : (new Date()).toISOString(),
+                        'showDeleted' : true,
+                        'singleEvents' : true,
+                        'maxResults' : 10,
+                        'orderBy' : 'startTime' 
+                    });
+                    
+                    request.execute(function(resp){
+                        var events = resp.items;
+                        
+                        console.log(events);
+                        
+                        appendPre('Upcoming events:');
+                        
+                        if (events.length > 0) {
+                            for (i = 0; i < events.length; i++) {
+                                var event = events[i];
+                                var when = event.start.dateTime;
+                                
+                                if (!when) {
+                                    when = event.start.date;
+                                }
+                                appendPre(event.summary + ' (' + when + ')');
+                                calendarEventsObject.push({
+                                    title : event.summary,
+                                    start : when
+                                });
+                            }
+                            
+                            $("#calendar").fullCalendar('addEventSource', calendarEventsObject);
+                        } else {
+                            appendPre('No upcoming events found.');
+                        }
+                    });
+                }
+            
+                function appendPre(message) {
+                    var pre = document.getElementById('output');
+                    var textContent = document.createTextNode(message + '\n');
+                    pre.appendChild(textContent);
+                }
+            
+                function auth(){
+                    console.log('authenticating');
+                    checkAuth();
+                }
+            
+                function handleAuthClick(event) {
+                    gapi.auth.authorize(
+                      {'client_id': clientID, 'scope': calendarScopes, 'immediate': false},
+                      handleAuthResult);
+                    return false;
+                }
+            
+                function test(_callback){
+                    top.frameSizeCallback(100);
+                    console.log('test calling');
+                    _callback(100);
+                    console.log('test lose');
+                }
+        
+        				$("#calendar").fullCalendar({
+                            header: {
+                                right: 'month agendaWeek agendaDay',
+                                left: 'prev next, today',
+                                center: 'title'
+                            },
+                            events: calendarEventsObject,
+                            color: 'yellow',   // an option!
+                            textColor: 'black' // an option!
+                        });
+            
+        </script>
+        
+        <script src="https://apis.google.com/js/client.js?onload=auth"></script>
+  </body>
+</apex:page>

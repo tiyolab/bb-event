@@ -1,0 +1,139 @@
+<apex:page showHeader="false" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0">    
+
+<html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">    
+
+  <head>
+    <title>Receptionist Desk</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js" />
+    <script type="text/javascript">
+      /*
+      $(document).ready(function(){
+        $(".slds-context-bar__item").click(function(){
+            $(".slds-context-bar__item").removeClass("slds-is-active");
+            $(this).addClass("slds-is-active");
+        });
+      });
+      */
+      function meetingPanel(){
+      	document.getElementById("meeting_appointment_panel").style.display = "flex";
+        $(".slds-context-bar__item").removeClass("slds-is-active");
+        $("#meeting_appointment_nav").addClass("slds-is-active");
+      }
+      
+      function visitorPanel(){
+      	document.getElementById("meeting_appointment_panel").style.display = "none";
+          
+        $(".slds-context-bar__item").removeClass("slds-is-active");
+        $("#visitor_nav").addClass("slds-is-active");
+      }
+    </script>
+
+    <apex:stylesheet value="{!URLFOR($Resource.slds214, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+  </head>    
+
+  <body>    
+
+    <!-- REQUIRED SLDS WRAPPER -->
+    <div class="xl">    
+
+      <!-- NAVIGATION -->
+      <div class="slds-context-bar">
+
+        <!-- APP TITLE -->
+        <div class="slds-context-bar__primary slds-context-bar__item--divider-right">
+          <div class="slds-context-bar__item slds-context-bar__dropdown-trigger slds-dropdown-trigger slds-dropdown-trigger--click slds-no-hover">
+            <div class="slds-context-bar__icon-action">
+              <a href="javascript:void(0);" class="slds-icon-waffle_container slds-context-bar__button">
+                <div class="slds-icon-waffle">
+                  <div class="slds-r1"></div>
+                  <div class="slds-r2"></div>
+                  <div class="slds-r3"></div>
+                  <div class="slds-r4"></div>
+                  <div class="slds-r5"></div>
+                  <div class="slds-r6"></div>
+                  <div class="slds-r7"></div>
+                  <div class="slds-r8"></div>
+                  <div class="slds-r9"></div>              
+                </div>
+              </a>
+            </div>
+            <span class="slds-context-bar__label-action slds-context-bar__app-name">
+              <span class="slds-truncate" title="{ props.appName || &#x27;App Name&#x27; }">Receptionist Desk</span>
+            </span>
+          </div>
+        </div>
+        <!-- / APP TITLE -->
+
+        <!-- TAB -->
+        <nav class="slds-context-bar__secondary" role="navigation">
+          <ul class="slds-grid">
+            <li class="slds-context-bar__item slds-is-active" id="meeting_appointment_nav">
+              <a href="javascript:void(0)" class="slds-context-bar__label-action" title="Meeting Appointment" onClick="meetingPanel()"><span class="slds-truncate">Meeting Appointment</span></a>
+            </li>
+
+            <li class="slds-context-bar__item" id="visitor_nav">
+              <a href="javascript:void(0)" class="slds-context-bar__label-action" title="Visitor" onClick="visitorPanel()"><span class="slds-truncate">Visitor</span></a>
+            </li>
+          </ul>
+        </nav>
+        <!-- / TAB -->  
+      </div>
+      <!-- / NAVIGATION -->
+
+      <!-- CONTAINER -->
+      <div class="slds-container--fluid"> 
+          <div class="slds-grid slds-grid--vertical-stretch" id="meeting_appointment_panel" aria-hidden="false">
+              
+              <!-- MANUAL REGISTRATION -->
+              <div class="slds-box slds-theme--default slds-size--4-of-6  slds-m-around--medium slds-panel">
+                  <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                      <div class="slds-panel__section">
+                          <div class="slds-media">
+                              <div class="slds-media__body">
+                                  <p class="slds-truncate slds-text-heading--small">
+                                      Manual Registration
+                                  </p>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div class="slds-panel__section">
+                          <h3>
+                              blablabla
+                          </h3>
+                      </div>
+                  </div>
+              </div>
+              <!-- / MANUAL REGISTRATION -->
+              
+              <!-- CHECK IN -->
+              <div class="slds-box slds-theme--default slds-size--2-of-6 slds-m-around--medium slds-panel">
+                  <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                      <div class="slds-panel__section">
+                          <div class="slds-media">
+                              <div class="slds-media__body">
+                                  <p class="slds-truncate slds-text-heading--small">
+                                      Check In
+                                  </p>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div class="slds-panel__section">
+                          
+                      </div>
+                  </div>
+              </div>
+              <!-- / CHECK IN -->
+              
+          </div>
+      </div>
+      <!-- / CONTAINER -->    
+
+    </div>
+    <!-- / REQUIRED SLDS WRAPPER -->    
+
+  </body>
+
+</html>
+</apex:page>

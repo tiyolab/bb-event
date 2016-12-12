@@ -1,0 +1,14 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <head>
+        <style>
+            iframe{
+            	border: none;
+            }
+        </style>
+    </head>
+    <body>
+        <ui:button aura:id="btn_test" press="{!c.test}">Test</ui:button>
+    	<iframe src="https://xl-vms-developer-edition.ap2.force.com/apex/calendar_page" id = "iframe" name="iframe" onload="{!c.setFrameSize}"/>
+    </body>
+    
+</aura:component>

@@ -1,0 +1,45 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="show" type="Boolean" default="true"/>
+    <aura:attribute name="width" type="Integer" default="100"/>
+    <aura:attribute name="height" type="Integer" default="100"/>
+	<style>
+        #spinner-container{
+            background: rgba(255, 255, 255, 0.5);
+            height: 100%;
+            width: 100%;
+            position: fixed;
+            z-index: 100000;
+            left: 0;
+            top: 0;
+        	display: {!if(v.show, 'block', 'none')}
+        }
+        
+        #spinner-background{
+        	background: rgba(255, 255, 255, 0.5);
+            height: 100%;
+            width: 100%;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+        
+        #bubble-container{
+        	position: fixed;
+        	left: 50%;
+        	top: 50%;
+        	width: {!v.width}px;
+        	height: {!v.height}px;
+        	margin-left: -{!v.width/2};
+        	margin-top: -{!v.height/2};
+        }
+    </style>
+    
+    <div id="spinner-container">
+        <div id="spinner-background"></div>
+        <div id="bubble-container">
+            <!-- LOAD SPINNER COMPONENT -->
+            <c:Spinner type="bubbles" width="{!v.width}" height="{!v.height}" color="blue" show="{!v.show}" />
+            <!-- END LOAD SPINNER COMPONENT -->
+        </div>
+    </div>
+</aura:component>

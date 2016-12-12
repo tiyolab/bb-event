@@ -1,0 +1,66 @@
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" controller="new_meeting">
+    
+    <aura:attribute name="start_meeting" type="String"/>
+    <aura:attribute name="end_meeting" type="String"/>
+    <aura:attribute name="rooms" type="Room__c[]"/>
+    <aura:attribute name="show_spinner" type="Boolean" default="true"/>
+    
+    <aura:handler name="init" value="{!this}" action="{!c.init}"/>
+    <aura:handler name="response_create_meeting" event="c:event_response_create_meeting" action="{!c.handle_response_create_meeting}"/>
+    
+    <head>
+        <ltng:require styles="{!$Resource.full_calendar + '/fullcalendar-3.0.1/fullcalendar.css'}"/>
+        <ltng:require scripts="{!join(',', 
+                               $Resource.full_calendar + '/fullcalendar-3.0.1/lib/jquery.min.js', 
+                               $Resource.full_calendar + '/fullcalendar-3.0.1/lib/moment.min.js', 
+                               $Resource.full_calendar + '/fullcalendar-3.0.1/fullcalendar.js')}"
+                      afterScriptsLoaded="{!c.initCalendar}"/>
+        
+        <ltng:require scripts="{!$Resource.calendar_v2}"/>
+        
+        <style>
+            #create-meeting-modal{
+            	display : none;
+            }
+            
+            iframe{
+            	display: none;
+            }
+        </style>
+        
+    </head>
+    <body>
+        
+        <!-- SPINNER COMPONENT -->
+        <c:my_spinner_loading width="100" height="100" show="{!v.show_spinner}" />
+        <!-- END OF SPINNER COMPONENT -->
+        
+        <div id='calendar'></div>
+        
+        <!-- MODAL NEW MEETING -->
+        <div id="create-meeting-modal">
+            <div role="dialog" tabindex="-1" aria-labelledby="header43" class="slds-modal slds-fade-in-open">
+              <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                  <button class="slds-button slds-modal__close slds-button--icon-inverse" title="Close" onclick="{!c.close_create_meeting_modal}">
+                    X
+                    <span class="slds-assistive-text">Close</span>
+                  </button>
+                  <h2 id="header43" class="slds-text-heading--medium">Create New Meeting</h2>
+                </div>
+                <div class="slds-modal__content slds-p-around--medium">
+                  <div>
+                      <!-- LOAD NEW MEETING COMPONENT -->
+                      <c:new_meeting start_meeting="{!v.start_meeting}" end_meeting="{!v.end_meeting}" rooms="{!v.rooms}"/>
+                      <!-- END LOAD NEW MEETING COMPONENT -->
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="slds-backdrop slds-backdrop--open"></div>
+		</div>
+        <!-- END OF MODAL NEW MEETING -->
+        
+    	<iframe src="https://xl-vms-developer-edition.ap2.force.com/apex/calendar_page_v2" id = "iframe" name="iframe" onload="{!c.calendar_data_loaded}"/>
+    </body>
+</aura:component>

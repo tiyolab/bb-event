@@ -1,0 +1,156 @@
+<aura:component controller="new_meeting" implements="forceCommunity:availableForAllPageTypes" access="global">
+    <ltng:require scripts="{!$Resource.full_calendar + '/fullcalendar-3.0.1/lib/jquery.min.js'}"/>
+    <ltng:require scripts="{!$Resource.calendar_v2}"/>
+    
+    <aura:attribute name="contacts" type="Contact[]"/>
+    <aura:attribute name="contact_maps" type="Map" default="{}"/>
+    <aura:attribute name="guests" type="Contact[]"/>
+    <aura:attribute name="rooms" type="Room__c[]"/>
+    <aura:attribute name="start_meeting" type="String"/>
+    <aura:attribute name="end_meeting" type="String"/>
+    <aura:attribute name="show_spinner" type="Boolean" default="false"/>
+    
+    <aura:registerEvent name="response_create_meeting" type="c:event_response_create_meeting"/>
+    
+    <style>
+        .guest-filter-result{
+        	border: none;
+        }
+        
+        .button-value{
+        	display:none;
+        }
+    </style>
+    
+    
+    <!-- SPINNER COMPONENT -->
+    <c:my_spinner_loading width="100" height="100" show="{!v.show_spinner}" />
+    <!-- END OF SPINNER COMPONENT -->
+    
+	<div>
+        <fieldset class="slds-form--compound">
+          <legend class="slds-form-element__label slds-text-title--caps">Subject</legend>
+          <div class="slds-form-element__group">
+            <div class="slds-form-element__row">
+              <div class="slds-form-element slds-size--1-of-1">
+                <ui:inputText aura:id="subject" class="slds-input" value=""/>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="slds-form--compound">
+          <legend class="slds-form-element__label slds-text-title--caps">Description</legend>
+          <div class="slds-form-element__group">
+            <div class="slds-form-element__row">
+              <div class="slds-form-element slds-size--1-of-1">
+                <ui:inputTextArea aura:id="description" class="slds-input" value="" rows="3"/>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="slds-form--compound">
+          <legend class="slds-form-element__label slds-text-title--caps">When</legend>
+          <div class="slds-form-element__group">
+            <div class="slds-form-element__row">
+              <div class="slds-form-element slds-size--1-of-2">
+                <label class="slds-form-element__label" for="start_meeting">Start Meeting</label>
+                <ui:inputDateTime aura:id="start_meeting" class="field slds-input" value="{!v.start_meeting}" displayDatePicker="true" />
+              </div>
+              <div class="slds-form-element slds-size--1-of-2">
+                <label class="slds-form-element__label" for="end_meeting">End Meeting</label>
+                <ui:inputDateTime aura:id="end_meeting" class="field slds-input" value="{!v.end_meeting}" displayDatePicker="true" />
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="slds-form--compound">
+          <legend class="slds-form-element__label slds-text-title--caps">Attendees</legend>
+          <div class="slds-form-element__group">
+            <div class="slds-form-element__row">
+              <div class="slds-form-element slds-size--1-of-1">
+                  
+                  <!--START SEARCH ATTENDEES-->
+                <div class="slds-form-element slds-lookup" id="search_attendees">
+                    <label class="slds-assistive-text" for="attendees_search">Search Attendees</label>
+                    <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--left">
+                        <div class="slds-grid slds-wrap slds-grid--pull-padded">
+                            <div class="slds-p-horizontal--small slds-size--4-of-5">
+                                <input id="attendees_search" class="slds-input slds-lookup__search-input" type="search" placeholder="Search Attendees" 
+                             aria-owns="global-search-list-01" role="combobox" aria-activedescendent="" aria-expanded="true" 
+                             aria-autocomplete="list" onkeyup="{!c._onAttendeesKeyUp}"/>
+                            </div>
+                            <div class="slds-p-horizontal--small slds-size--1-of-5">
+                                <ui:button label="->" press="{!c.add_new_guest}"/>
+                            </div>
+                        </div>
+                        
+                        <!-- DISPLAY FILTER RESULT -->
+                      <div>
+                          <div class="slds-lookup__item--label slds-text-body--small" id="loading_info" style="display:none">Searching...</div>
+                          <div class="slds-lookup__item--label slds-text-body--small" id="message_info" style="display:none"></div>
+                          <ul>
+                              <aura:iteration items="{!v.contacts}" var="contact">
+                                  <li role="presentation">
+                                      <ui:button class="slds-lookup__item-action slds-media slds-media--center guest-filter-result" aura:id="{!contact.Id}" press="{!c._onFilterResultClicked}" >
+                                        <ui:outputText aura:id="filter-result-value" value="{!contact.Id}" class='button-value'/>
+                                        <div class="slds-media__body">
+                                            <div class="slds-lookup__result-text"><ui:outputText value="{!contact.LastName + ',' + !contact.FirstName}"/></div>
+                                            <span class="slds-lookup__result-meta slds-text-body--small">{!contact.Email}</span>
+                                        </div>
+                                      </ui:button>
+                                    </li>
+                              </aura:iteration>
+                          </ul>
+                      </div>
+                         <!-- END OF DISPLAY FILTER RESULT -->
+                        
+                    </div>
+                  </div>
+                  <!--END SEARCH ATTENDEES-->
+                  
+              </div>
+            </div>
+            <div class="slds-form-element__row">
+              <div class="slds-form-element slds-size--1-of-1">
+                  
+                  <!-- ITERATE SELECTED ATTENDEES -->
+                  <aura:iteration items="{!v.guests}" var="g">
+                      <span class="slds-pill">
+                          <div class="slds-tile">
+                              <h3 class="slds-truncate" title="Salesforce UX"><a href="javascript:void(0);">{!g.LastName}, {!g.FirstName}</a></h3>
+                              <div class="slds-tile__detail slds-text-body--small">
+                                  <p class="slds-truncate" title="26 Members">{!g.Email}</p>
+                              </div>
+                          </div>
+                          <ui:button class="slds-button slds-button--icon slds-pill__remove" press="{!c.unselect_attendess}">
+                              <ui:outputText aura:id="candidate-attendees" value="{!g.Id}" class='button-value'/>
+                              X
+                          </ui:button>
+                      </span>
+                  </aura:iteration>
+                  <!-- END OF ITERATE SELECTED ATTENDEES -->
+                  
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="slds-form--compound">
+          <legend class="slds-form-element__label slds-text-title--caps">Room</legend>
+          <div class="slds-form-element__group">
+            <div class="slds-form-element__row">
+              <div class="slds-form-element slds-size--1-of-1">
+                  <ui:inputSelect class="slds-input" aura:id="selected_room">
+                      <ui:inputSelectOption text="" label="Please select the room" value="true"/>
+                      <aura:iteration items="{!v.rooms}" var="room">
+                          <ui:inputSelectOption text="{!room.Id}" label="{!room.Name}"/>
+                      </aura:iteration>
+                  </ui:inputSelect>
+              </div>
+            </div>
+          </div>
+        </fieldset>
+        <fieldset class="slds-form--compound">
+            <ui:button class="slds-button slds-button--brand" label="Save" press="{!c.create_new_meeting}"/>
+        </fieldset>
+    </div>
+</aura:component>

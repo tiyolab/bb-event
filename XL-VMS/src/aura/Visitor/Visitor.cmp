@@ -1,0 +1,95 @@
+<aura:component controller="LookupSObjectController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >
+    <!-- ATTRIBUTE -->
+    <aura:attribute name="newContact" type="Contact" default="{'sobjectType' : 'Contact', 'Name' : '', 'Birthdate' : '', 'ID_Number__c' : '', 'ID_Type__c' : '', 'Birthdate' : '', 'Phone' : '', 'Email' : ''}" />
+    <aura:attribute name="searchString" type="String" description="The search string to find." />
+    <aura:attribute name="sObjectAPIName" type="String" description="The API name of the SObject to search" />
+    <aura:attribute name="matchingResult" type="LookupSObjectController.SearchResult[]" description="The resulting matches returned by the Apex controller." />
+    <aura:attribute name="recordId" type="Id" description="selected soBject record Id" />
+    <!-- / ATTRIBUTE -->    
+    
+	<!-- VISITOR REGISTRATION FORM -->
+    <fieldset class="slds-box slds-box-theme--default slds-container--medium slds-m-around--medium" >
+    	<div class="slds-panel">
+            
+            <!-- PANEL HEADER -->
+         	<div class="slds-panel__section">
+               	<div class="slds-media">
+                   	<div class="slds-media__body">
+                       	<p class="slds-truncate slds-text-heading--small">Visitor Registration Form</p>
+                    </div>
+                </div>
+            </div>
+            <!-- / PANEL HEADER -->
+                    
+            <!-- FORM -->
+            <div class="slds-panel__section">
+                <div class="slds-form--stacked">
+                    <div class="slds-form-element slds-is-required">
+                        <div class="slds-form-elemet__control">
+                            <ui:inputText aura:id="contactName" label="Name" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.Name}" required="true" placeholder="Visitor Name" />
+                        </div>
+                    </div>
+                    
+                    <div class="slds-form-element">
+                        <div class="slds-form-element__control">
+                            <input aura:id="host" label="Host Contact" class="slds-input" labelClass="slds-form-element__label" value="{!v.searchString}" placeholder="Host Contact" updateOn="keyup" keyup="{!c.search}" />
+                        </div>
+                    </div>
+                    
+                    <!-- Lookup List, initially hidden -->
+                    <div aura:id="lookup-list" class="slds-lookup__menu slds-hide" role="listbox">
+                        <div class="slds-lookup__item">
+                        	<button class="slds-button">&quot;{!v.searchString}&quot; in {!v.sObjectAPIName}</button>
+                        </div>
+                        
+                    	<ul aura:id="lookup-list-items" class="sdls-lookup__list" role="presentation">
+                        	<aura:iteration items="{!v.matchingResult}" var="match">
+                            	<li class="slds-lookup__item">
+                                   <a id="{!globalId + '_id_' + match.SObjectId}" href="javascript:void(0);" role="option" onclick="{!c.select}">{!match.SObjectLabel}</a>
+                                </li>
+                            </aura:iteration>
+                        </ul>
+                    </div>
+                    
+                    <div class="slds-form-element slds-is-required">
+                    	<div class="slds-form-element__control">
+                            <ui:inputText aura:id="contactIDNum" label="ID Number" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.ID_Number__c}" required="true" placeholder="ID Number such as Government ID, Driver License or Passport" />
+                        </div>
+                    </div>
+                    
+                    <div class="slds-form-element slds-is-required">
+                    	<div class="slds-form-element__control">
+                            <ui:inputSelect aura:id="idType" label="ID Type" class="slds-select" labelClass="slds-form-element__label" value="{!v.newContact.ID_Type__c}" required="true">
+                                <ui:inputSelectOption text="Government ID" label="Government ID" value="Government ID" />
+                                <ui:inputSelectOption text="Driver License" label="Driver License" value="Driver License" />
+                                <ui:inputSelectOption text="Passport" label="Passport" value="Passport" />
+                            </ui:inputSelect>
+                        </div>
+                    </div>
+                    
+                    <div class="slds-form-element">
+                    	<div class="slds-form-element__control">
+                            <ui:inputDate aura:id="birthdate" label="Birthdate" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.Birthdate}" displayDatePicker="true" />
+                        </div>
+                    </div>
+                    
+                    <div class="slds-form-element slds-is-required">
+                    	<div class="slds-form-element__control">
+                            <ui:inputText aura:id="phone" label="Phone" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.Phone}" required="true" placeholder="Phone Number" />
+                        </div>
+                    </div>
+                    
+                    <div class="slds-form-element">
+                    	<div class="slds-form-element__control">
+                            <ui:inputText aura:id="email" label="Email" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.Email}" placeholder="Email" />
+                        </div>
+                    </div>
+                                            
+                </div>
+            </div>
+            <!-- / FORM -->
+            
+        </div>
+    </fieldset>
+    <!-- / VISITOR REGISTRATION FORM -->
+</aura:component>

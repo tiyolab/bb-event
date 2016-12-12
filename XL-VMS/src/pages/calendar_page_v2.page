@@ -1,0 +1,180 @@
+<apex:page showHeader="false" sidebar="false">
+    <body>
+        <div id="authorize-div" style="display: none">
+          <span>Authorize access to Google Calendar API</span>
+          <!--Button for the user to click to initiate auth sequence -->
+          <button id="authorize-button" onclick="handleAuthClick(event)">
+            Authorize
+          </button>
+        </div>
+        <pre id="output"></pre>
+        <div id='calendar'></div>
+        
+        
+        <script>
+        		var calendarEventsObject = [];
+            	var clientID = '687607039990-tpfj9bgr7r20vlgltoi070gji02egc9p.apps.googleusercontent.com';
+                var calendarScopes = ["https://www.googleapis.com/auth/calendar"];
+                
+                function checkAuth(){
+                    gapi.auth.authorize({
+                        'client_id' : clientID,
+                        'scope' : calendarScopes.join(' '),
+                        'immediate' :  true
+                    }, handleAuthResult);
+                }
+            
+                /**
+                 * handle response from auth server
+                 * 
+                 * @param {Object} result Authorization result.
+                 */
+                function handleAuthResult(result){
+                     var authorizeDiv = document.getElementById('authorize-div');
+                    if(result && !result.error){
+                        //authorize
+                        authorizeDiv.style.display = 'none';
+        
+                        loadCalendarAPI();
+                    }else{
+                        //not authorize
+                        //authorizeDiv.style.display = 'inline';
+                        
+                        var x = confirm("Authorize access to Google Calendar API.");
+                        if(x == true){
+                            handleAuthClick();
+                        }
+                    }
+                }
+            
+                /**
+                 * Load Google Calendar client library. List upcoming events
+                 * once client library is loaded.
+                 */
+                function loadCalendarAPI(){
+                    gapi.client.load('calendar', 'v3', listUpcomingEvents);
+                }
+            
+                /**
+                 * Print the summary and start datetime/date of the next ten events in
+                 * the authorized user's calendar. If no events are found an
+                 * appropriate message is printed.
+                 */
+                function listUpcomingEvents(){
+                    var request = gapi.client.calendar.events.list({
+                        'calendarId' : 'primary',
+                        'showDeleted' : false,
+                        'singleEvents' : false,
+                        'maxResults' : 250
+                    });
+                    
+                    request.execute(function(resp){
+                        var events = resp.items;
+                        
+                        console.log(events);
+                        
+                        appendPre('Upcoming events:');
+                        
+                        if (events.length > 0) {
+                            for (i = 0; i < events.length; i++) {
+                                var event = events[i];
+                                var start_event = event.start.dateTime;
+                                var end_event = event.end.dateTime;
+                                
+                                if (!start_event) {
+                                    start_event = event.start.date;
+                                }
+                                
+                                if (!end_event) {
+                                    end_event = event.end.date;
+                                }
+                                
+                                appendPre(event.summary + ' (' + start_event + ')');
+                                if(event.status != 'cancelled'){
+                                    calendarEventsObject.push({
+                                        title : event.summary,
+                                        start : start_event,
+                                        end : end_event,
+                                        id : event.id
+                                    });
+                                }
+                            }
+                            
+                        } else {
+                            appendPre('No upcoming events found.');
+                        }
+                        
+                        /**
+                        * run parent static resource javascript
+                        */
+                        window.parent.setEventsToCalendar(calendarEventsObject);
+                    });
+                }
+            
+                function appendPre(message) {
+                    var pre = document.getElementById('output');
+                    var textContent = document.createTextNode(message + '\n');
+                    pre.appendChild(textContent);
+                }
+            
+                function auth(){
+                    console.log('authenticating');
+                    checkAuth();
+                }
+            
+                function handleAuthClick() {
+                    gapi.auth.authorize(
+                      {'client_id': clientID, 'scope': calendarScopes, 'immediate': false},
+                      handleAuthResult);
+                    return false;
+                }
+        
+        		function createCalendarEvent(eventMetadata, callback){
+                    var event = {
+                        'summary' : eventMetadata.subject,
+                        'location' : eventMetadata.room,
+                        'description' : eventMetadata.description,
+                        'start' : {
+                            'dateTime' : eventMetadata.start_meeting,
+                            'timeZone' : eventMetadata.timezone
+                        },
+                        'end' : {
+                            'dateTime' : eventMetadata.end_meeting,
+                            'timeZone' : eventMetadata.timezone
+                        },
+                        'attendees' : eventMetadata.attendees,
+                        'reminders': {
+                            'useDefault': false,
+                            'overrides': [
+                                {'method': 'email', 'minutes': 24 * 60},
+                                {'method': 'popup', 'minutes': 10}
+                            ]
+                        }
+
+                    };
+                    
+                    var request = gapi.client.calendar.events.insert({
+                      	'calendarId': 'primary',
+                        'resource': event
+                        //'sendNotifications' : true
+                    });
+                    
+                    request.execute(function(event) {
+                        if(event != null && event.status == 'confirmed'){
+                            callback(true, event);
+                            appendPre('Event created: ' + event.htmlLink);
+                        }else{
+                            callback(false, null);
+                        }
+                    });
+                }
+        
+        		function test_function(){
+                    
+                }
+            
+        </script>
+        
+        <script src="https://apis.google.com/js/client.js?onload=auth"></script>
+    </body>
+</apex:page>

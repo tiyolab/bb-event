@@ -1,0 +1,12 @@
+<aura:event type="COMPONENT">
+    <!--<aura:attribute name="start_meeting" type="String"/>
+    <aura:attribute name="end_meeting" type="String"/>
+    <aura:attribute name="subject" type="String"/>
+    <aura:attribute name="room" type="String"/>
+    <aura:attribute name="meeting_id" type="String"/>-->
+    
+    <aura:attribute name="meeting" type="Meeting__c"/>
+    <aura:attribute name="guests" type="Guest__c[]" />
+    <aura:attribute name="timezone" type="String" />
+    <aura:attribute name="guests_email" type="String" />
+</aura:event>

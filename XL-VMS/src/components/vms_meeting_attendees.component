@@ -1,0 +1,17 @@
+<apex:component controller="vms_meeting_attendees_controller" access="global">
+    <apex:attribute name="meeting_id" type="Id" assignTo="{!meetingId}" description="id of meeting"/>
+    <apex:attribute name="my_id" type="Id" assignTo="{!me}" description="id of me"/>
+    <div style="display:{!if(attendees.size > 0, 'block', 'none')};">
+        <ul>
+            <apex:repeat value="{!attendees}" var="at">
+                <li>{!if(at.Contact__r.LastName == 'Guest', at.Contact__r.Email, (at.Contact__r.LastName + ', ' + at.Contact__r.FirstName))}</li>
+            </apex:repeat>
+        </ul>
+    </div>
+    <div style="display:{!if(attendees.size == 0, 'block', 'none')};">
+        <ul>
+            <li>Only You and Host.</li>
+        </ul>
+    </div>
+    
+</apex:component>

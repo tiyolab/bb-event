@@ -1,0 +1,7 @@
+<apex:component controller="vms_meeting_time_controller" access="global">
+    <apex:attribute name="start" type="DateTime" assignTo="{!t_start}" description="start of meeting"/>
+    <apex:attribute name="end" type="DateTime" assignTo="{!t_end}" description="end of meeting"/>
+    <p>
+        {!time}
+    </p>
+</apex:component>
