@@ -78,5 +78,22 @@
             }
         });
         $A.enqueueAction(action);
+    },
+    
+    sendToRest : function(Meetings){
+        var xHttp;
+        if(window.XMLHttpRequest){
+            xHttp = new XMLHttpRequest();
+        }else{
+            xHttp = new ActiveXObject('Microsoft.XMLHTTP');
+        }
+        xHttp.onreadystatechange = function(){
+            if(this.readyState == 4 && this.status == 200){
+                //response
+            }
+        };
+        xHttp.open('POST', 'url', true);
+        xHttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        xHttp.send(JSON.stringify(Meetings));
     }
 })

@@ -79,7 +79,6 @@
                     var guestsEmail = [];
                     
                     guests_contact.forEach(function(guest, index){
-                        console.log(guest.Email);
                         guestsEmail.push({'email' : guest.Email});
                     });
                     
@@ -88,8 +87,7 @@
                      */
                     var evt = component.getEvent('response_create_meeting');
                     evt.setParams({
-                        'meeting' : response.getReturnValue().meeting,
-                        'guests' : response.getReturnValue().guests,
+                        'meetings' : response.getReturnValue().meetings,
                         'guests_email' : JSON.stringify(guestsEmail),
                         'timezone' : response.getReturnValue().timezone
                     });

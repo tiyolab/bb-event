@@ -39,7 +39,6 @@
             },
             eventClick: function(event){
                 helper.detailMeeting(component, event.id);
-            	console.log(event.id);
             }
         })
 	},
@@ -54,17 +53,16 @@
          */
         component.set('v.show_spinner', true);
         
-        var meeting = event.getParam('meeting');
-        var guests = event.getParam('guests');
+        var meetings = event.getParam('meetings');
         var attendees = JSON.parse(event.getParam('guests_email'));
         var timezone = event.getParam('timezone');
         
         var meetingMetadata = {
-            'subject' : meeting.Subject__c,
-            'room' : meeting.Room__c,
-            'description' : meeting.Description__c,
-            'start_meeting' : meeting.Start_Meeting__c,
-            'end_meeting' : meeting.End_Meeting__c,
+            'subject' : meetings[0].Subject__c,
+            'room' : meetings[0].Room__c,
+            'description' : meetings[0].Description__c,
+            'start_meeting' : meetings[0].Start_Meeting__c,
+            'end_meeting' : meetings[0].End_Meeting__c,
             'attendees' : attendees,
             'timezone' : timezone
         }
@@ -80,16 +78,19 @@
                 $("#create-meeting-modal").css('display', 'none');
                 
             	/**
-            	 * save event id from calendar api to sldc
+            	 * save event id from calendar api to related meetings
             	 */
-            	meeting.Event_Id__c = eventCreated.id;
+                meetings.forEach(function(meeting, index){
+                	meeting.Event_Id__c = eventCreated.id;    
+                });
+            	
             	var action = component.get('c.sendEmailInvitation');
             	action.setParams({
-            		'meeting' : meeting,
-                    'guests' : guests
+            		'meetings' : meetings
             	});
             	action.setCallback(this, function(response){
             		if(component.isValid() && response.getState() == 'SUCCESS'){
+                        console.log('send email response = ' + response.getReturnValue());
             			if(response.getReturnValue() != null && response.getReturnValue() == true){
             				/**
                              * close spinner
