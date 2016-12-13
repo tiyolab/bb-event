@@ -1,10 +1,5 @@
-<aura:component controller="LookupSObjectController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >
     <!-- ATTRIBUTE -->
-    <aura:attribute name="newContact" type="Contact" default="{'sobjectType' : 'Contact', 'Name' : '', 'Birthdate' : '', 'ID_Number__c' : '', 'ID_Type__c' : '', 'Birthdate' : '', 'Phone' : '', 'Email' : ''}" />
-    <aura:attribute name="searchString" type="String" description="The search string to find." />
-    <aura:attribute name="sObjectAPIName" type="String" description="The API name of the SObject to search" />
-    <aura:attribute name="matchingResult" type="LookupSObjectController.SearchResult[]" description="The resulting matches returned by the Apex controller." />
-    <aura:attribute name="recordId" type="Id" description="selected soBject record Id" />
     <!-- / ATTRIBUTE -->    
     
 	<!-- VISITOR REGISTRATION FORM -->
@@ -80,9 +75,7 @@
                     </div>
                     
                     <div class="slds-form-element">
-                    	<div class="slds-form-element__control">
-                            <ui:inputText aura:id="email" label="Email" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.Email}" placeholder="Email" />
-                        </div>
+                    	
                     </div>
                                             
                 </div>

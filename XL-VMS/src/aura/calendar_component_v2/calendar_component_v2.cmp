@@ -1,4 +1,7 @@
 <aura:component implements="forceCommunity:availableForAllPageTypes" access="global" controller="new_meeting">
+    <aura:registerEvent name="edit_meeting" type="c:event_edit_meeting"/>
+    <aura:registerEvent name="open_modal" type="c:event_open_modal"/>
+    <aura:registerEvent name="close_modal" type="c:event_close_modal"/>
     
     <aura:attribute name="start_meeting" type="String"/>
     <aura:attribute name="end_meeting" type="String"/>
@@ -7,6 +10,7 @@
     
     <aura:handler name="init" value="{!this}" action="{!c.init}"/>
     <aura:handler name="response_create_meeting" event="c:event_response_create_meeting" action="{!c.handle_response_create_meeting}"/>
+    <aura:handler name="response_edit_meeting" event="c:event_response_edit_meeting" action="{!c.handle_response_edit_meeting}"/>
     
     <head>
         <ltng:require styles="{!$Resource.full_calendar + '/fullcalendar-3.0.1/fullcalendar.css'}"/>
@@ -23,6 +27,10 @@
             	display : none;
             }
             
+            #edit-meeting-modal{
+            	display : none;
+            }
+            
             iframe{
             	display: none;
             }
@@ -30,7 +38,6 @@
         
     </head>
     <body>
-        
         <!-- SPINNER COMPONENT -->
         <c:my_spinner_loading width="100" height="100" show="{!v.show_spinner}" />
         <!-- END OF SPINNER COMPONENT -->
@@ -60,6 +67,30 @@
             <div class="slds-backdrop slds-backdrop--open"></div>
 		</div>
         <!-- END OF MODAL NEW MEETING -->
+        
+        <!-- MODAL EDIT MEETING -->
+        <div id="edit-meeting-modal">
+            <div role="dialog" tabindex="-1" aria-labelledby="header43" class="slds-modal slds-fade-in-open">
+              <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                  <button class="slds-button slds-modal__close slds-button--icon-inverse" title="Close" onclick="{!c.close_edit_meeting_modal}">
+                    X
+                    <span class="slds-assistive-text">Close</span>
+                  </button>
+                  <h2 class="slds-text-heading--medium">Edit Meeting</h2>
+                </div>
+                <div class="slds-modal__content slds-p-around--medium">
+                  <div>
+                      <!-- LOAD EIDT MEETING COMPONENT -->
+                      <c:edit_meeting rooms="{!v.rooms}"/>
+                      <!-- END LOAD EDIT MEETING COMPONENT -->
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="slds-backdrop slds-backdrop--open"></div>
+		</div>
+        <!-- END OF MODAL EDIT MEETING -->
         
     	<iframe src="https://xl-vms-developer-edition.ap2.force.com/apex/calendar_page_v2" id = "iframe" name="iframe" onload="{!c.calendar_data_loaded}"/>
     </body>

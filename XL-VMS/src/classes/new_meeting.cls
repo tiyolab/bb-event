@@ -20,6 +20,12 @@ public with sharing class new_meeting {
         List<Contact> savedContact = new List<Contact>();
         List<Meeting__c> meetings = new List<Meeting__c>();
         
+        /**
+         * data send to gallgher
+         */
+        List<Map<String, Object>> datas = new List<Map<String, Object>>();
+        List<Map<String, Object>> relatedAccesses = new List<Map<String, Object>>();
+        
         Savepoint sp = Database.setSavepoint();
     
         /**
@@ -81,7 +87,62 @@ public with sharing class new_meeting {
             return null;
         }
         
+        /**
+         * get access item data
+         */
+        for(Related_Access__c r : [select Access_Item__r.Id, Access_Item__r.Name from Related_Access__c where Room__c = :room]){
+            Map<String, Object> tmp = new Map<String, Object>();
+            tmp.put('id', r.Access_Item__r.Id);
+            tmp.put('name', r.Access_Item__r.Name);
+            
+            relatedAccesses.add(tmp);
+        }
+        
+        /**
+         * get meeting data send to gallagher
+         */
+        List<Meeting__c> meetingDatas = [select 
+                                         Id, 
+                                         Start_Meeting__c, 
+                                         End_Meeting__c, 
+                                         Subject__c, 
+                                         Description__c, 
+                                         Host__c, 
+                                         Guest__c,
+                                         Guest__r.ID_Number__c, 
+                                         Guest__r.MailingStreet, 
+                                         Guest__r.MailingCity, 
+                                         Guest__r.MailingState, 
+                                         Guest__r.MailingCountry, 
+                                         Room__c
+                                         from Meeting__c where Id in :meetings
+                                        ];
+        for(Meeting__c m : meetingDatas){
+            Map<String, Object> maps = new Map<String, Object>();
+            maps.put('visitorId', m.Id);
+            maps.put('fromdate', m.Start_Meeting__c);
+            maps.put('todate', m.End_Meeting__c);
+            maps.put('subject', m.Subject__c);
+            maps.put('description', m.Description__c);
+            maps.put('host', m.Host__c);
+            maps.put('roomnumber', m.Room__c);
+            maps.put('idnumber', m.Guest__r.ID_Number__c);
+            maps.put('address', m.Guest__r.MailingStreet +', '+ m.Guest__r.MailingCity +', '+ m.Guest__r.MailingState +', '+ m.Guest__r.MailingCountry);
+            maps.put('access', relatedAccesses);
+            
+            datas.add(maps);
+        }
+        System.debug(JSON.serialize(datas));
+        /*if(!sendToGallagher(JSON.serialize(datas))){
+            Database.rollback(sp);
+            return null;
+        }*/
+        
+        /**
+         * get host timezone
+         */
         User u = [select TimeZoneSidKey from User where Id =:UserInfo.getUserId()];
+        
         Map<String, object> toReturn = new Map<String, object>();
         toReturn.put('timezone', u.TimeZoneSidKey);
         toReturn.put('meetings', meetings);
@@ -97,14 +158,7 @@ public with sharing class new_meeting {
     
     @AuraEnabled
     public static Boolean sendEmailInvitation(Meeting__c[] meetings){
-        List<Related_Access__c> access = new List<Related_Access__c>();
-        List<Map<String, Object>> datas = new List<Map<String, Object>>();
-        
-        /**
-         * get access item data
-         */
-        access = [select Access_Item__r.Id, Access_Item__r.Name from Related_Access__c where Room__c = :meetings[0].Room__c];
-        
+        System.debug(meetings);
         /**
          * set calendar event id to meetings data
          */
@@ -117,31 +171,31 @@ public with sharing class new_meeting {
         }catch(DMLException e){
             return false;
         }
-        
+       
         /**
-         * send email invitation to guests
+       	 * send email invitation to guests
          */
         for(Meeting__c g : meetings){
-            System.debug(g);
-        	Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();    
-            mail.setTargetObjectId(g.Guest__c);
-            mail.setTemplateId('00X28000001G2ZQ');
-            mail.setSenderDisplayName('XL Meeting Invitation');
-            mail.setWhatId(g.Id);
-            mail.setSaveAsActivity(false);
-            Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});
+                System.debug(g);
+                Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();    
+                mail.setTargetObjectId(g.Guest__c);
+                mail.setTemplateId('00X28000001G2ZQ');
+                mail.setSenderDisplayName('XL Meeting Invitation');
+                mail.setWhatId(g.Id);
+                mail.setSaveAsActivity(false);
+                Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});
         }
-        
+        System.debug('true');
         return true;
     }
     
-    private static Boolean sendToGallagher(Meeting__c[] meetings){
+    private static Boolean sendToGallagher(String meetings){
         Http http = new Http();
         HttpRequest request = new HttpRequest();
         request.setEndpoint('uri');
         request.setMethod('POST');
         request.setHeader('Content-Type', 'application/json;charset=UTF-8');
-        request.setBody(JSON.serialize(meetings));
+        request.setBody(meetings);
         HttpResponse response = http.send(request);
         if(response.getStatusCode() == 200){
             return true;

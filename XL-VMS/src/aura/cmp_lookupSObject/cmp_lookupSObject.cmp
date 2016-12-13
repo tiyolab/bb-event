@@ -1,0 +1,7 @@
+<aura:component controller="ctrl_LookupSObjectController">
+	<ltng:require styles="/resource/slds214/assets/styles/salesforce-lightning-design-system-ltng.css" />
+    
+    <aura:attribute name="sObjectAPIName" type="String" required="true" />
+    <aura:attribute name="label" type="String" required="true" />
+    <aura:attribute name="pluralLabel" type="String" required="true" />
+</aura:component>

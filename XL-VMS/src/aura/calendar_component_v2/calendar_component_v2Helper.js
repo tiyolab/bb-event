@@ -61,7 +61,21 @@
     },
     
     detailMeeting : function(component, event_id){
-        var action = component.get('c.getMeetingId');
+        /**
+         * open modal
+         */
+        $("#edit-meeting-modal").css('display', 'block');
+        
+        /**
+         * send event to edit_meeting component
+         */
+        var event_edit_meeting = $A.get('e.c:event_edit_meeting');
+        event_edit_meeting.setParams({
+            'event_id' : event_id
+        });
+        event_edit_meeting.fire();
+        
+        /*var action = component.get('c.getMeetingId');
         action.setParams({
             'eventId' : event_id
         });
@@ -77,7 +91,7 @@
                 }
             }
         });
-        $A.enqueueAction(action);
+        $A.enqueueAction(action);*/
     },
     
     sendToRest : function(Meetings){

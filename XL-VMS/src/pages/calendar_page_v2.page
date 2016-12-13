@@ -129,7 +129,7 @@
                     return false;
                 }
         
-        		function createCalendarEvent(eventMetadata, callback){
+        		function createCalendarEvent(eventMetadata, component, callback){
                     var event = {
                         'summary' : eventMetadata.subject,
                         'location' : eventMetadata.room,
@@ -157,6 +157,48 @@
                       	'calendarId': 'primary',
                         'resource': event
                         //'sendNotifications' : true
+                    });
+                    
+                    request.execute(function(event) {
+                        if(event != null && event.status == 'confirmed'){
+                            callback(true, event);
+                            appendPre('Event created: ' + event.htmlLink);
+                        }else{
+                            callback(false, null);
+                        }
+                    });
+                }
+        
+        		function updateCalendarEvent(eventMetadata, callback){
+                    
+                    var event = {
+                        'summary' : eventMetadata.subject,
+                        'location' : eventMetadata.room,
+                        'description' : eventMetadata.description,
+                        'start' : {
+                            'dateTime' : eventMetadata.start_meeting,
+                            'timeZone' : eventMetadata.timezone
+                        },
+                        'end' : {
+                            'dateTime' : eventMetadata.end_meeting,
+                            'timeZone' : eventMetadata.timezone
+                        },
+                        'attendees' : eventMetadata.attendees,
+                        'reminders': {
+                            'useDefault': false,
+                            'overrides': [
+                                {'method': 'email', 'minutes': 24 * 60},
+                                {'method': 'popup', 'minutes': 10}
+                            ]
+                        }
+
+                    };
+                    
+                    var request = gapi.client.calendar.events.update({
+                      	'calendarId': 'primary',
+                        'eventId' : eventMetadata.eventId,
+                        'resource': event,
+                        'sendNotifications' : true
                     });
                     
                     request.execute(function(event) {

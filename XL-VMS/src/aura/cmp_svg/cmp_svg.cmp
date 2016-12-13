@@ -1,0 +1,5 @@
+<aura:component >
+    <aura:attribute name="class" type="String" />
+    <aura:attribute name="xlinkHref" type="String" />
+    <aura:attribute name="ariaHidden" type="String" />
+</aura:component>
