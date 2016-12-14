@@ -1,6 +1,4 @@
-<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >
-    <!-- ATTRIBUTE -->
-    <!-- / ATTRIBUTE -->    
+<aura:component controller="ctrl_LookupSObjectController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >   
     
 	<!-- VISITOR REGISTRATION FORM -->
     <fieldset class="slds-box slds-box-theme--default slds-container--medium slds-m-around--medium" >
@@ -31,21 +29,6 @@
                         </div>
                     </div>
                     
-                    <!-- Lookup List, initially hidden -->
-                    <div aura:id="lookup-list" class="slds-lookup__menu slds-hide" role="listbox">
-                        <div class="slds-lookup__item">
-                        	<button class="slds-button">&quot;{!v.searchString}&quot; in {!v.sObjectAPIName}</button>
-                        </div>
-                        
-                    	<ul aura:id="lookup-list-items" class="sdls-lookup__list" role="presentation">
-                        	<aura:iteration items="{!v.matchingResult}" var="match">
-                            	<li class="slds-lookup__item">
-                                   <a id="{!globalId + '_id_' + match.SObjectId}" href="javascript:void(0);" role="option" onclick="{!c.select}">{!match.SObjectLabel}</a>
-                                </li>
-                            </aura:iteration>
-                        </ul>
-                    </div>
-                    
                     <div class="slds-form-element slds-is-required">
                     	<div class="slds-form-element__control">
                             <ui:inputText aura:id="contactIDNum" label="ID Number" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.ID_Number__c}" required="true" placeholder="ID Number such as Government ID, Driver License or Passport" />
@@ -74,9 +57,7 @@
                         </div>
                     </div>
                     
-                    <div class="slds-form-element">
-                    	
-                    </div>
+                    
                                             
                 </div>
             </div>

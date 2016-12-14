@@ -56,6 +56,34 @@
         }
     },
     
+    openModal : function(component, event, helper){
+        component.set('v.start_meeting', event.getParam('startMeeting'));
+        component.set('v.end_meeting', event.getParam('endMeeting'));
+        /**
+         * get available room
+         */
+        var action = component.get('c.searchRoom');
+        action.setCallback(this, function(response){
+            if(component.isValid() && response.getState() == 'SUCCESS'){
+                if(response.getReturnValue() != null){
+                    component.set('v.rooms', response.getReturnValue());
+                }
+            }
+        });
+        $A.enqueueAction(action);
+        
+        $("#create-meeting-modal").css('display', 'block');
+    },
+    
+    closeModal : function(component){
+      	$("#create-meeting-modal").css('display', 'none');  
+        component.find('subject').set('v.value', '');
+        component.find('description').set('v.value', '');
+        component.set('start_meeting', '');
+        component.set('end_meeting', '');
+        component.set('v.guests', []);
+    },
+    
     create_new_meeting : function(component, event, helper){
         /**
          * show spinner
@@ -150,5 +178,9 @@
         component.set('v.guests', guests);
         
         $('#attendees_search').val('');
+    },
+    
+    sendToServer : function(data){
+        
     }
 })

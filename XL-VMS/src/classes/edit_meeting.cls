@@ -10,6 +10,11 @@ public with sharing class edit_meeting {
     }
     
     @AuraEnabled
+    public static List<Room__c> searchRoom(){
+        return [select Id, Name from Room__c where Status__c = 'Free'];
+    }
+    
+    @AuraEnabled
     public static List<Meeting__c> getMeeting(String eventId){
         return [select Id,
                Event_Id__c,

@@ -1,20 +1,4 @@
-({
-    init : function(component, event, helper){
-				/**
-                 * get available room
-                 */
-                var action = component.get('c.searchRoom');
-                action.setCallback(this, function(response){
-                    if(component.isValid() && response.getState() == 'SUCCESS'){
-                        if(response.getReturnValue() != null){
-                            console.log(response.getReturnValue());
-                            component.set('v.rooms', response.getReturnValue());
-                        }
-                    }
-                });
-                $A.enqueueAction(action);
-    },
-    
+({  
     initCalendar : function(component, event, helper) {
         $("#calendar").fullCalendar({
             header: {
@@ -27,13 +11,15 @@
 			selectHelper: true,
             editable: true,
             select : function(start, end){
-                component.set('v.start_meeting', start.format('YYYY-MM-DD'));
-                component.set('v.end_meeting', helper.fromFullCalendar(end.format('YYYY-MM-DD')));
-                
                 /**
-                 * open modal
+                 * open create meeting modal
                  */
-                $("#create-meeting-modal").css('display', 'block');
+                var event = $A.get('e.c:event_open_create_meeting');
+                event.setParams({
+                    'startMeeting' : start.format('YYYY-MM-DD'),
+                    'endMeeting' : helper.fromFullCalendar(end.format('YYYY-MM-DD'))
+                });
+                event.fire();
                 
                 $('#calendar').fullCalendar('unselect');
             },
@@ -42,20 +28,6 @@
             }
         })
 	},
-    
-    close_create_meeting_modal : function(){
-        var event = $A.get('e.c:event_close_modal');
-        event.fire();
-        
-        $("#create-meeting-modal").css('display', 'none');
-    },
-    
-    close_edit_meeting_modal : function(){
-        var event = $A.get('e.c:event_close_modal');
-        event.fire();
-        
-        $("#edit-meeting-modal").css('display', 'none');
-    },
     
     handle_response_create_meeting : function(component, event, helper){
         var that = this;
@@ -192,6 +164,17 @@
                 $("#calendar").fullCalendar('renderEvent', newMeeting, true);
                 
                 console.log('update finished');
+            }
+        });
+    },
+    
+    handle_delete_meeting : function(component, event, helper){
+        var eventId = event.getParam('eventId');
+        console.log(eventId);
+        document.getElementById('iframe').contentWindow.deleteEvent(eventId, function(status){
+            if(status){
+                console.log('delete success');
+                $("#calendar").fullCalendar('removeEvents', eventId);
             }
         });
     },

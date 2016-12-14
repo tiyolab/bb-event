@@ -90,10 +90,11 @@ public with sharing class new_meeting {
         /**
          * get access item data
          */
-        for(Related_Access__c r : [select Access_Item__r.Id, Access_Item__r.Name from Related_Access__c where Room__c = :room]){
+        for(Related_Access__c r : [select Id, Access_Item__c, Room__c from Related_Access__c where Room__c = :room]){
             Map<String, Object> tmp = new Map<String, Object>();
-            tmp.put('id', r.Access_Item__r.Id);
-            tmp.put('name', r.Access_Item__r.Name);
+            tmp.put('id', r.Id);
+            tmp.put('accessItem', r.Access_Item__c);
+            tmp.put('room', r.Room__c);
             
             relatedAccesses.add(tmp);
         }
@@ -132,11 +133,9 @@ public with sharing class new_meeting {
             
             datas.add(maps);
         }
+        
         System.debug(JSON.serialize(datas));
-        /*if(!sendToGallagher(JSON.serialize(datas))){
-            Database.rollback(sp);
-            return null;
-        }*/
+        sendToGallagher(JSON.serialize(datas));
         
         /**
          * get host timezone
@@ -146,6 +145,7 @@ public with sharing class new_meeting {
         Map<String, object> toReturn = new Map<String, object>();
         toReturn.put('timezone', u.TimeZoneSidKey);
         toReturn.put('meetings', meetings);
+        toReturn.put('sendGallagher', JSON.serialize(datas));
         
         return toReturn;
     }
@@ -189,17 +189,20 @@ public with sharing class new_meeting {
         return true;
     }
     
-    private static Boolean sendToGallagher(String meetings){
+    @future(callout=true)
+    private static void sendToGallagher(String meetings){
         Http http = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndpoint('uri');
+        request.setEndpoint('http://182.253.1.69:9080/maximo/rest/os/VMSMEETING/?_format=json&_lid=wilson&_lpwd=wilson');
         request.setMethod('POST');
         request.setHeader('Content-Type', 'application/json;charset=UTF-8');
         request.setBody(meetings);
         HttpResponse response = http.send(request);
+        System.debug(response.getBody());
         if(response.getStatusCode() == 200){
-            return true;
+            System.debug('rest success');
+            //return true;
         }
-        return false;
+        //return false;
     }
 }

@@ -83,7 +83,8 @@
         console.log(component.get('v.selected_room'));
     },
     
-    close_modal : function(component, event, helper){
+    closeModal : function(component, event, helper){
+        $("#edit-meeting-modal").css('display', 'none');
         /**
          * clear variable
          */
@@ -95,9 +96,10 @@
         component.set('v.selected_room', '');
     },
     
-    open_edit_meeting : function(component, event, helper){
-        var eventId = event.getParam('event_id');
+    openModal : function(component, event, helper){
+        $("#edit-meeting-modal").css('display', 'block');
         
+        var eventId = event.getParam('eventId');
         component.set('v.event_id', eventId);
         
       	var action = component.get('c.getMeeting');
@@ -128,8 +130,20 @@
                 }
             }
         });
-        $A.enqueueAction(action);  
-        console.log(action);
+        $A.enqueueAction(action);
+        
+         /**
+         * get available room
+         */
+        var action2 = component.get('c.searchRoom');
+        action2.setCallback(this, function(response){
+            if(component.isValid() && response.getState() == 'SUCCESS'){
+                if(response.getReturnValue() != null){
+                    component.set('v.rooms', response.getReturnValue());
+                }
+            }
+        });
+        $A.enqueueAction(action2);
     },
     
     save_changes : function(component, event, helper){

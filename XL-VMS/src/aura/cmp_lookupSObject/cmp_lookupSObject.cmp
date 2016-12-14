@@ -4,4 +4,23 @@
     <aura:attribute name="sObjectAPIName" type="String" required="true" />
     <aura:attribute name="label" type="String" required="true" />
     <aura:attribute name="pluralLabel" type="String" required="true" />
+    <aura:attribute name="listIconSVGPath" type="String" default="/resource/slds214/assets/icons/custom-sprite/svg/symbols.svg#custom11" />
+    <aura:attribute name="listIconClass" type="String" default="slds-icon-custom-11" />
+    <aura:attribute name="searchString" type="String" />
+    
+    <aura:registerEvent name="updateLookupIdEvent" type="c:evt_updateLookupId" />
+    <aura:registerEvent name="clearLookupIdEvent" type="c:evt_clearLookupId" />
+    
+    <div class="xl">
+    	<div aura:id="lookup-div" class="slds-lookup" data-select="single" data-scope="single" data-typehead="true">
+        	<div class="slds-form-element">
+            	<label class="slds-form-element__label" for="lookup">{!v.label}</label>
+                <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--right">
+                    
+                    <ui:inputText aura:id="lookup" value="{!v.searchString}" class="slds-input" />
+                </div>
+            </div>
+        </div>
+    </div>
+    
 </aura:component>

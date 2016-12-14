@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="event to delete meeting">
+    <aura:attribute name="eventId" type="String"/>
+</aura:event>

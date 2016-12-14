@@ -211,6 +211,25 @@
                     });
                 }
         
+        		function deleteEvent(eventId, callback){
+                    var request = gapi.client.calendar.events.delete({
+                      	'calendarId': 'primary',
+                        'eventId' : eventId,
+                        'sendNotifications' : true
+                    });
+                    
+                    request.execute(function(event) {
+                        console.log(event);
+                        callback(true);
+                        /*if(event != null && event.status == 'confirmed'){
+                            callback(true);
+                            appendPre('Event created: ' + event.htmlLink);
+                        }else{
+                            callback(false);
+                        }*/
+                    });
+                }
+        
         		function test_function(){
                     
                 }

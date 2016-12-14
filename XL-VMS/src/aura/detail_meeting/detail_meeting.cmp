@@ -1,0 +1,126 @@
+<aura:component controller="detail_meeting" implements="forceCommunity:availableForAllPageTypes" access="global">
+	<ltng:require scripts="{!$Resource.full_calendar + '/fullcalendar-3.0.1/lib/jquery.min.js'}"/>
+    <ltng:require scripts="{!$Resource.calendar_v2}"/>
+    
+    <aura:registerEvent name="open_edit_meeting" type="c:event_open_edit_meeting"/>
+    <aura:registerEvent name="delete_meeting" type="c:event_delete_meeting"/>
+    
+    <aura:handler event="c:event_open_detail_meeting" action="{!c.openModal}"/>
+    
+    <aura:attribute name="eventId" type="String" default=""/>
+    <aura:attribute name="subject" type="String" default=""/>
+    <aura:attribute name="description" type="String" default=""/>
+    <aura:attribute name="startMeeting" type="String" default=""/>
+    <aura:attribute name="endMeeting" type="String" default=""/>
+    <aura:attribute name="room" type="String" default=""/>
+    <aura:attribute name="meetings" type="Meeting__c[]" default="[]"/>
+    
+    	<style>
+            #detail-meeting-modal{
+            	display : none;
+            }
+        </style>
+    <!-- MODAL DETAIL MEETING -->
+        <div id="detail-meeting-modal">
+            <div role="dialog" tabindex="-1" aria-labelledby="header43" class="slds-modal slds-fade-in-open">
+              <div class="slds-modal__container">
+                <div class="slds-modal__header">
+                  <button class="slds-button slds-modal__close slds-button--icon-inverse" title="Close" onclick="{!c.closeModal}">
+                    X
+                    <span class="slds-assistive-text">Close</span>
+                  </button>
+                  <h2 class="slds-text-heading--medium">Detail Meeting</h2>
+                </div>
+                <div class="slds-modal__content slds-p-around--medium">
+                  <div>
+                      <!-- CONTENT -->
+                      
+                      
+                      <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap">
+                          <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                            <div class="slds-panel__section slds-has-divider--bottom">
+                              <div class="slds-media">
+                                <div class="slds-media__body">
+                                  <div class="slds-button-group slds-m-top--small" role="group">
+                                      <ui:button class="slds-button slds-button--neutral slds-grow" label="Edit" press="{!c.edit}"/>
+                                      <ui:button class="slds-button slds-button--neutral slds-grow" label="Delete" press="{!c.handleDeleteMeeting}"/>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="slds-panel__section">
+                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                <span class="slds-form-element__label">Subject</span>
+                                <div class="slds-form-element__control">
+                                  <span class="slds-form-element__static">{!v.subject}</span>
+                                </div>
+                              </div>
+                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                <span class="slds-form-element__label">Description</span>
+                                <div class="slds-form-element__control">
+                                  <span class="slds-form-element__static">{!v.description}</span>
+                                </div>
+                              </div>
+                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                <span class="slds-form-element__label">Start Meeting</span>
+                                <div class="slds-form-element__control">
+                                  <span class="slds-form-element__static"><ui:outputDateTime value="{!v.startMeeting}"/></span>
+                                </div>
+                              </div>
+                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                <span class="slds-form-element__label">End Meeting</span>
+                                <div class="slds-form-element__control">
+                                  <span class="slds-form-element__static"><ui:outputDateTime value="{!v.endMeeting}"/></span>
+                                </div>
+                              </div>
+                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                <span class="slds-form-element__label">Attendess</span>
+                                <div class="slds-form-element__control">
+                                    
+                                  <!-- ITERATE TROUGHT ATENDESS -->
+                                    <aura:iteration items="{!v.meetings}" var="guest">
+                                    	<div class="slds-tile slds-media">
+                                          <div class="slds-media__body">
+                                            <div class="slds-tile__detail slds-text-body--small">
+                                              <dl class="slds-dl--horizontal">
+                                                <dt class="slds-dl--horizontal__label">
+                                                  <p class="slds-truncate" title="Company">Name:</p>
+                                                </dt>
+                                                <dd class="slds-dl--horizontal__detail slds-tile__meta">
+                                                  <p class="slds-truncate" title="Salesforce">{!guest.Guest__r.LastName}, {!guest.Guest__r.FirstName}</p>
+                                                </dd>
+                                                <dt class="slds-dl--horizontal__label">
+                                                  <p class="slds-truncate" title="Email">Email:</p>
+                                                </dt>
+                                                <dd class="slds-dl--horizontal__detail slds-tile__meta">
+                                                  <p class="slds-truncate" title="salesforce-ux@salesforce.com">{!guest.Guest__r.Email}</p>
+                                                </dd>
+                                              </dl>
+                                            </div>
+                                          </div>
+                                        </div>    
+                                    </aura:iteration>
+                                  <!-- END ITERATE TROUGHT ATENDESS -->
+                                    
+                                </div>
+                              </div>
+                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                <span class="slds-form-element__label">Room</span>
+                                <div class="slds-form-element__control">
+                                  <span class="slds-form-element__static">{!v.room}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      
+                      
+                      <!-- END CONTENT -->
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="slds-backdrop slds-backdrop--open"></div>
+		</div>
+        <!-- END OF MODAL DETAIL MEETING -->
+</aura:component>

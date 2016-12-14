@@ -62,18 +62,29 @@
     
     detailMeeting : function(component, event_id){
         /**
-         * open modal
+         * open detail modal
          */
-        $("#edit-meeting-modal").css('display', 'block');
+        var event = $A.get('e.c:event_open_detail_meeting');
+        event.setParams({
+            'eventId' : event_id
+        });
+        event.fire();
+        
+        /**
+         * open edit modal
+         */
+        //$("#edit-meeting-modal").css('display', 'block');
         
         /**
          * send event to edit_meeting component
          */
-        var event_edit_meeting = $A.get('e.c:event_edit_meeting');
+        /*var event_edit_meeting = $A.get('e.c:event_edit_meeting');
         event_edit_meeting.setParams({
             'event_id' : event_id
         });
-        event_edit_meeting.fire();
+        event_edit_meeting.fire();*/
+        
+        
         
         /*var action = component.get('c.getMeetingId');
         action.setParams({

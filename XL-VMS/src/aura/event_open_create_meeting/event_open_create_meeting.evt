@@ -1,0 +1,4 @@
+<aura:event type="APPLICATION" description="Event to open create meeting modal" access="global">
+    <aura:attribute name="startMeeting" type="String"/>
+    <aura:attribute name="endMeeting" type="String"/>
+</aura:event>

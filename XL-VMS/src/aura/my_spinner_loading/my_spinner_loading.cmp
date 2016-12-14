@@ -4,7 +4,7 @@
     <aura:attribute name="height" type="Integer" default="100"/>
 	<style>
         #spinner-container{
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
             height: 100%;
             width: 100%;
             position: fixed;
@@ -29,13 +29,15 @@
         	top: 50%;
         	width: {!v.width}px;
         	height: {!v.height}px;
-        	margin-left: -{!v.width/2};
-        	margin-top: -{!v.height/2};
+        	margin-left: -{!v.width/2}px;
+        	margin-top: -{!v.height/2}px;
         }
     </style>
     
     <div id="spinner-container">
-        <div id="spinner-background"></div>
+        <div id="spinner-background">
+            {!v.show}
+        </div>
         <div id="bubble-container">
             <!-- LOAD SPINNER COMPONENT -->
             <c:Spinner type="bubbles" width="{!v.width}" height="{!v.height}" color="blue" show="{!v.show}" />
