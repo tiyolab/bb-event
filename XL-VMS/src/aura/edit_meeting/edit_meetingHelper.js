@@ -19,5 +19,13 @@
         
 		$('#edit_loading_info').css('display', displayLoading);
         $('#edit_message_info').css('display', displayMessage);
-	}
+	},
+    
+    showSpinner : function(component, isShow){
+        var event = component.getEvent('toggle_spinner');
+        event.setParams({
+            'isShow' : isShow
+        });
+        event.fire();
+    }
 })

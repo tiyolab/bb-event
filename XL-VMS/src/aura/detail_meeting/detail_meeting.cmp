@@ -4,6 +4,7 @@
     
     <aura:registerEvent name="open_edit_meeting" type="c:event_open_edit_meeting"/>
     <aura:registerEvent name="delete_meeting" type="c:event_delete_meeting"/>
+    <aura:registerEvent name="toggle_spinner" type="c:event_toggle_spinner" />
     
     <aura:handler event="c:event_open_detail_meeting" action="{!c.openModal}"/>
     

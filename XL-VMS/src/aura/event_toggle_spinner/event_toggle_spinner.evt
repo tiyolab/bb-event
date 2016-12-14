@@ -1,0 +1,3 @@
+<aura:event type="COMPONENT" description="Event to shwo or hide spinner loading" >
+    <aura:attribute name="isShow" type="Boolean" default="false" required="true"/>
+</aura:event>

@@ -34,7 +34,7 @@
         /**
          * show spinner
          */
-        component.set('v.show_spinner', true);
+        component.set('v.showSpinner', true);
         
         var meetings = event.getParam('meetings');
         var attendees = JSON.parse(event.getParam('guests_email'));
@@ -55,12 +55,6 @@
          */
         document.getElementById('iframe').contentWindow.createCalendarEvent(meetingMetadata, component, function(status, eventCreated){
             if(status){
-                $("#calendar").focus();
-                /**
-                 * close dialog
-                 */
-                $("#create-meeting-modal").css('display', 'none');
-                
             	/**
             	 * save event id from calendar api to related meetings
             	 */
@@ -68,45 +62,36 @@
                 	meeting.Event_Id__c = eventCreated.id;    
                 });
                 
-            	var action = component.get('c.sendEmailInvitation');
-            	action.setParams({
-            		'meetings' : meetings
-            	});
-            	action.setCallback(that, function(response){
-            		if(component.isValid() && response.getState() == 'SUCCESS'){
-            			if(response.getReturnValue() != null && response.getReturnValue() == true){                            
-            				/**
-                             * close spinner
-                             */
-                            component.set('v.show_spinner', false);
+                helper.updateEventId(meetings);
+                
+            	/**
+            	 * render event to calendar
+                 */
+                var start_meeting = eventCreated.start.dateTime;
+                var end_meeting = eventCreated.end.dateTime;
                             
-                            /**
-                             * render event to calendar
-                             */
-                            var start_meeting = eventCreated.start.dateTime;
-                            var end_meeting = eventCreated.end.dateTime;
+                if(!start_meeting){
+                    start_meeting = eventCreated.start.date;
+                }
                             
-                            if(!start_meeting){
-                                start_meeting = eventCreated.start.date;
-                            }
+                if(!end_meeting){
+                    end_meeting = eventCreated.end.date;
+                }
                             
-                            if(!end_meeting){
-                                end_meeting = eventCreated.end.date;
-                            }
-                            
-                            var newMeeting = {
-                                title : eventCreated.summary,
-                                start : start_meeting,
-                                end : end_meeting,
-                                id : eventCreated.id
-                            }
-                            
-                            $("#calendar").fullCalendar('renderEvent', newMeeting, true);
-            			}
-            		}
-            	});
-            	$A.enqueueAction(action);
+                var newMeeting = {
+                    title : eventCreated.summary,
+                    start : start_meeting,
+                    end : end_meeting,
+                    id : eventCreated.id
+                }
+                
+                $("#calendar").fullCalendar('renderEvent', newMeeting, true);
+                
             }else{
+                /**
+                 * close spinner
+                 */
+                component.set('v.showSpinner', false);
                 alert('Meeting not created');
             }
         });
@@ -116,7 +101,7 @@
         /**
          * show spinner
          */
-        component.set('v.show_spinner', true);
+        component.set('v.showSpinner', true);
         
         var meetings = event.getParam('meetings');
         var attendees = JSON.parse(event.getParam('guests_email'));
@@ -165,10 +150,20 @@
                 
                 console.log('update finished');
             }
+            
+            /**
+             * hide spinner
+             */
+            component.set('v.showSpinner', false);
         });
     },
     
     handle_delete_meeting : function(component, event, helper){
+        /**
+         * show spinner
+         */
+        component.set('v.showSpinner', true);
+        
         var eventId = event.getParam('eventId');
         console.log(eventId);
         document.getElementById('iframe').contentWindow.deleteEvent(eventId, function(status){
@@ -176,14 +171,23 @@
                 console.log('delete success');
                 $("#calendar").fullCalendar('removeEvents', eventId);
             }
+            
+            /**
+             * hide spinner
+             */
+            component.set('v.showSpinner', false);
         });
     },
     
     calendar_data_loaded : function(component, event, helper){
-        component.set('v.show_spinner', false);
+        component.set('v.showSpinner', false);
+    },
+    
+    handle_toggle_spinner : function(component, event, handler){
+        component.set('v.showSpinner', event.getParam('isShow'));
     },
     
     test_function : function(component){
-        console.log(component.get('v.show_spinner'));
+        console.log(component.get('v.showSpinner'));
     }
 })

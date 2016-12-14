@@ -8,11 +8,12 @@
     <aura:attribute name="rooms" type="Room__c[]"/>
     <aura:attribute name="start_meeting" type="String"/>
     <aura:attribute name="end_meeting" type="String"/>
-    <aura:attribute name="show_spinner" type="Boolean" default="false"/>
     
     <aura:registerEvent name="response_create_meeting" type="c:event_response_create_meeting"/>
+    <aura:registerEvent name="toggle_spinner" type="c:event_toggle_spinner" />
     
     <aura:handler event="c:event_open_create_meeting" action="{!c.openModal}"/>
+    <aura:handler event="c:event_update_eventid" action="{!c.updateEventId}"/>
     
     <style>
         .guest-filter-result{
@@ -27,11 +28,6 @@
         	display : none;
         }
     </style>
-    
-    
-    <!-- SPINNER COMPONENT -->
-    <c:my_spinner_loading width="100" height="100" show="{!v.show_spinner}" />
-    <!-- END OF SPINNER COMPONENT -->
     
     <!-- MODAL NEW MEETING -->
         <div id="create-meeting-modal">

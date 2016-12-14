@@ -1,0 +1,3 @@
+<aura:component >
+	<p>Hello World</p>
+</aura:component>

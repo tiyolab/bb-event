@@ -97,7 +97,15 @@
     },
     
     openModal : function(component, event, helper){
+        var dataLoaded = false;
+        var roomLoaded = false;
+        
         $("#edit-meeting-modal").css('display', 'block');
+        
+        /**
+         * show spinner
+         */
+        helper.showSpinner(component, true);
         
         var eventId = event.getParam('eventId');
         component.set('v.event_id', eventId);
@@ -107,6 +115,8 @@
             'eventId' : eventId
         });
         action.setCallback(this, function(response){
+            dataLoaded = true;
+            
             if(component.isValid() && response.getState() == 'SUCCESS'){
                 if(response.getReturnValue() != null){
                     component.set('v.old_meeting', response.getReturnValue());
@@ -129,6 +139,13 @@
                     component.set('v.selected_room', response.getReturnValue()[0].Room__c);
                 }
             }
+            
+            if(dataLoaded && roomLoaded){
+             	/**
+                 * hide spinner
+                 */
+                helper.showSpinner(component, false);   
+            }
         });
         $A.enqueueAction(action);
         
@@ -137,16 +154,30 @@
          */
         var action2 = component.get('c.searchRoom');
         action2.setCallback(this, function(response){
+            roomLoaded = true;
+            
             if(component.isValid() && response.getState() == 'SUCCESS'){
                 if(response.getReturnValue() != null){
                     component.set('v.rooms', response.getReturnValue());
                 }
+            }
+            
+            if(dataLoaded && roomLoaded){
+             	/**
+                 * hide spinner
+                 */
+                helper.showSpinner(component, false);   
             }
         });
         $A.enqueueAction(action2);
     },
     
     save_changes : function(component, event, helper){
+        /**
+         * show spinner
+         */
+        helper.showSpinner(component, true);
+        
         var action = component.get('c.saveChanges');
         action.setParams({
             'eventId' : component.get('v.event_id'),
@@ -181,9 +212,17 @@
                     });
                     event.fire();
                     
+                    $("#edit-meeting-modal").css('display', 'none');
+                    
                     alert('update success');
                 }
             }
+            
+            /**
+             * hide spinner
+             */
+            helper.showSpinner(component, false);
+            
         });
         $A.enqueueAction(action);
         console.log(action);

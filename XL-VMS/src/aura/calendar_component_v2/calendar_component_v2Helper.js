@@ -120,5 +120,13 @@
         xHttp.open('POST', 'url', true);
         xHttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
         xHttp.send(JSON.stringify(Meetings));
+    },
+    
+    updateEventId : function(meetings){
+        var event = $A.get('e.c:event_update_eventid');
+        event.setParams({
+            'meetings' : meetings
+        });
+        event.fire();
     }
 })

@@ -11,9 +11,9 @@
     <aura:attribute name="guests" type="Contact[]" default="[]"/>
     <aura:attribute name="selected_room" type="Room__c" default=""/>
     <aura:attribute name="rooms" type="Room__c[]" default="[]"/>
-    <aura:attribute name="show_spinner" type="Boolean" default="false"/>
     
     <aura:registerEvent name="response_edit_meeting" type="c:event_response_edit_meeting"/>
+    <aura:registerEvent name="toggle_spinner" type="c:event_toggle_spinner" />
     
     <style>
         .guest-filter-result{
@@ -29,10 +29,6 @@
         }
     </style>
     
-    
-    <!-- SPINNER COMPONENT -->
-    <c:my_spinner_loading width="100" height="100" show="{!v.show_spinner}" />
-    <!-- END OF SPINNER COMPONENT -->
     
     <!-- MODAL EDIT MEETING -->
         <div id="edit-meeting-modal">

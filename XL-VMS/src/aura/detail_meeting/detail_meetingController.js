@@ -1,6 +1,10 @@
 ({
 	openModal : function(component, event, helper) {
 		$('#detail-meeting-modal').css('display', 'block');
+        /**
+         * show spinner
+         */
+        helper.showSpinner(component, true);
         
         var eventId = event.getParam('eventId');
         component.set('v.eventId', eventId);
@@ -21,6 +25,11 @@
                     component.set('v.room', meetings[0].Room__r.Name);
                 }
             }
+            /**
+             * hide spinner
+             */
+            helper.showSpinner(component, false);
+            
         });
         $A.enqueueAction(action);
 	},
@@ -40,6 +49,11 @@
     },
     
     handleDeleteMeeting : function(component, event, helper){
+        /**
+         * show spinner
+         */
+        helper.showSpinner(component, true);
+        
         var action = component.get('c.deleteMeeting');
         action.setParams({
             'eventId' : component.get('v.eventId')
@@ -58,6 +72,11 @@
                     alert('failed delete Meeting');
                 }
             }
+            
+            /**
+             * hide spinner
+             */
+            helper.showSpinner(component, false);
         });
         $A.enqueueAction(action);
 	}

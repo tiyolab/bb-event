@@ -8,5 +8,13 @@
         component.set('v.startMeeting', '');
         component.set('v.endMeeting', '');
         component.set('v.room', '');
-	}
+	},
+    
+    showSpinner : function(component, isShow){
+        var event = component.getEvent('toggle_spinner');
+        event.setParams({
+            'isShow' : isShow
+        });
+        event.fire();
+    }
 })

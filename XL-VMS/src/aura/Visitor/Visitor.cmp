@@ -1,6 +1,10 @@
-<aura:component controller="ctrl_LookupSObjectController" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >   
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >   
+    <!-- ATTRIBUTES -->
+    <aura:attribute name="newContact" type="Contact" default="{'sObjectType' : 'Contact', 'Name' : '', 'ID_Number__c' : '', 'ID_Type__c' : ''}" />
+    <aura:attribute name="searchString" type="String" />
+    <!-- / ATTRIBUTES -->
     
-	<!-- VISITOR REGISTRATION FORM -->
+    <!-- VISITOR REGISTRATION FORM -->
     <fieldset class="slds-box slds-box-theme--default slds-container--medium slds-m-around--medium" >
     	<div class="slds-panel">
             
@@ -25,7 +29,7 @@
                     
                     <div class="slds-form-element">
                         <div class="slds-form-element__control">
-                            <input aura:id="host" label="Host Contact" class="slds-input" labelClass="slds-form-element__label" value="{!v.searchString}" placeholder="Host Contact" updateOn="keyup" keyup="{!c.search}" />
+                            <ui:inputText aura:id="host" label="Host" class="slds-input" labelClass="slds-form-element__label" value="{!v.searchString}" placeholder="Host" required="true" />
                         </div>
                     </div>
                     
@@ -57,8 +61,6 @@
                         </div>
                     </div>
                     
-                    
-                                            
                 </div>
             </div>
             <!-- / FORM -->

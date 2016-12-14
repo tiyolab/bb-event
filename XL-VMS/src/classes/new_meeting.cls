@@ -135,7 +135,7 @@ public with sharing class new_meeting {
         }
         
         System.debug(JSON.serialize(datas));
-        sendToGallagher(JSON.serialize(datas));
+        //sendToGallagher(JSON.serialize(datas));
         
         /**
          * get host timezone
@@ -204,5 +204,10 @@ public with sharing class new_meeting {
             //return true;
         }
         //return false;
+    }
+    
+    @AuraEnabled
+    public static boolean test(){
+        return true;
     }
 }
