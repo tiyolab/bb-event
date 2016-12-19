@@ -113,6 +113,9 @@
         action.setCallback(this, function(response){
             if(component.isValid() && response.getState() == 'SUCCESS'){
                 if(response.getReturnValue() != null){
+                    var strSendToGallagher = response.getReturnValue().sendGallagher;
+                    //helper.sendToRest('http://xl-wms.hol.es/get.php', 'POST', strSendToGallagher);
+                    
                     var guests_contact = component.get('v.guests');
                     var guestsEmail = [];
                     

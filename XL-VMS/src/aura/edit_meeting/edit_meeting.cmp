@@ -158,9 +158,9 @@
                             <div class="slds-form-element__row">
                               <div class="slds-form-element slds-size--1-of-1">
                                   <ui:inputSelect class="slds-input" aura:id="selected_room" change="{!c.change_room}">
+                                      <ui:inputSelectOption text="{!v.old_meeting[0].Room__c}" label="{!v.old_meeting[0].Room__r.Name}" value="true"/>
                                       <aura:iteration items="{!v.rooms}" var="room">
-                                          <ui:inputSelectOption text="{!room.Id}" label="{!room.Name}" 
-                                                                value="{!if(room.Id == v.selected_room, true, false)}"/>
+                                          <ui:inputSelectOption text="{!room.Id}" label="{!room.Name}"/>
                                       </aura:iteration>
                                   </ui:inputSelect>
                               </div>

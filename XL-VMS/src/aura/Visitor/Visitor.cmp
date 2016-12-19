@@ -1,7 +1,11 @@
-<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >   
+<aura:component controller="ctrl_NewVisitor" implements="force:appHostable,flexipage:availableForAllPageTypes,flexipage:availableForRecordHome,force:hasRecordId,forceCommunity:availableForAllPageTypes" access="global" >   
+    <ltng:require scripts="{!$Resource.full_calendar + '/fullcalendar-3.0.1/lib/jquery.min.js'}"/>
+    
     <!-- ATTRIBUTES -->
     <aura:attribute name="newContact" type="Contact" default="{'sObjectType' : 'Contact', 'Name' : '', 'ID_Number__c' : '', 'ID_Type__c' : ''}" />
     <aura:attribute name="searchString" type="String" />
+    <aura:attribute name="contacts" type="Contact[]" />
+    <aura:attribute name="contactMaps" type="Map" default="{}" />
     <!-- / ATTRIBUTES -->
     
     <!-- VISITOR REGISTRATION FORM -->
@@ -27,9 +31,34 @@
                         </div>
                     </div>
                     
-                    <div class="slds-form-element">
-                        <div class="slds-form-element__control">
-                            <ui:inputText aura:id="host" label="Host" class="slds-input" labelClass="slds-form-element__label" value="{!v.searchString}" placeholder="Host" required="true" />
+                    <div class="slds-form-element slds-lookup"> 
+                        <label class="slds-form-element__label" for="host">Host</label>
+                        <div class="slds-form-element__control">                            
+                            <input id="host" class="slds-input slds-lookup__search-input" type="search" 
+                             aria-owns="global-search-list-01" role="combobox" aria-activedescendent="" aria-expanded="true" 
+                             aria-autocomplete="list" value="{!v.searchString}" placeholder="Host" required="true" onkeyup="{!c.searchHost}" />
+                            
+                            <!-- SEARCH RESULT -->
+                            <div>
+                            	<div class="slds-lookup__item--label slds-text-body--small" id="loading_info" style="display:none">Searching...</div>
+                                <div class="slds-lookup__item--label slds-text-body--small" id="message_info" style="display:none"></div>
+                                
+                                <ul id="listContact">
+									<aura:iteration items="{!v.contacts}" var="contact">
+                                    	<li role="presentation">
+                                        	<ui:button class="slds-lookup__item-action slds-media slds-media--center guest-filter-result" aura:id="{contact.Id}" press="{!c.onFilterClicked}">                                                
+                                                <div class="slds-media__body">
+                                                	<div class="slds-lookup__result-text">
+                                                        <ui:outputText value="{!contact.FirstName + ' ' + !contact.LastName}" />
+                                                        <span class="slds-lookup__result-meta slds-text-body--small">{!contact.Email}</span>
+                                                    </div>
+                                                </div>
+                                            </ui:button>
+                                        </li>
+                                    </aura:iteration>                                
+                                </ul>
+                            </div>
+                            <!-- / SEARCH RESULT -->
                         </div>
                     </div>
                     

@@ -1,0 +1,5 @@
+<apex:page standardController="Meeting__c">
+    <apex:form >
+        <apex:commandButton value="Test"/>
+    </apex:form>
+</apex:page>

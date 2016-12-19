@@ -27,7 +27,8 @@ public with sharing class edit_meeting {
                Guest__r.FirstName,
                Guest__r.LastName,
                Guest__r.Email,
-               Room__c 
+               Room__c,
+               Room__r.Name
                from Meeting__c where Event_Id__c = :eventId];
     }
     

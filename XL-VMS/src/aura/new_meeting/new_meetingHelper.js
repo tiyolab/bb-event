@@ -27,5 +27,38 @@
             'isShow' : isShow
         });
         event.fire();
+    },
+    
+    sendToRest : function(requestUrl, method, meetings){
+        /*var xHttp;
+        if(window.XMLHttpRequest){
+            xHttp = new XMLHttpRequest();
+        }else{
+            xHttp = new ActiveXObject('Microsoft.XMLHTTP');
+        }
+        xHttp.onreadystatechange = function(){
+            if(this.readyState == 4 && this.status == 200){
+                //response
+            }
+        };
+        xHttp.open(method, url, true);
+        xHttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+        xHttp.send(JSON.stringify(meetings));*/
+        console.log(JSON.parse(meetings));
+        $.ajax({
+            url: requestUrl,
+            type: method,
+            contentType: 'application/json',
+            xhrFields: {
+                withCredentials: false
+            },
+            data: JSON.parse(meetings),
+            success: function(response){
+                console.log(response);
+            },
+            error: function(error){
+                console.log(error)
+            }
+        });
     }
 })

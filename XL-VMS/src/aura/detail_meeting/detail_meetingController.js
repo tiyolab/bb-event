@@ -14,8 +14,10 @@
             'eventId' : eventId
         });
         action.setCallback(this, function(response){
+            console.log(response);
+            console.log(response.getReturnValue());
             if(component.isValid() && response.getState() == 'SUCCESS'){
-                if(response.getReturnValue() != null){
+                if(response.getReturnValue() != null && response.getReturnValue().length>0){
 					var meetings = response.getReturnValue();
                     component.set('v.meetings', meetings);
                     component.set('v.subject', meetings[0].Subject__c);

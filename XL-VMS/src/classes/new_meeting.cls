@@ -1,7 +1,7 @@
 public with sharing class new_meeting {
-	@AuraEnabled
+    @AuraEnabled
     public static List<Contact> searchContact(String searchValue){
-       	List<List<sObject>> result =  [find :searchValue+'*' in all fields returning Contact(id, FirstName, LastName, Email)];
+        List<List<sObject>> result =  [find :searchValue+'*' in all fields returning Contact(id, FirstName, LastName, Email)];
         if(result.size() > 0){
             return (List<Contact>)result[0];
         }
@@ -46,7 +46,7 @@ public with sharing class new_meeting {
          * save new contact
          */
         try{
-        	insert newContact;    
+            insert newContact;    
         }catch(DMLException e){
             Database.rollback(sp);
             return null;
@@ -77,10 +77,10 @@ public with sharing class new_meeting {
             }
             
             try{
-            	insert meetings;
+                insert meetings;
             }catch(DMLException e){
-            	Database.rollback(sp);
-            	return null;    
+                Database.rollback(sp);
+                return null;    
             }
         }else{
             Database.rollback(sp);
@@ -90,14 +90,15 @@ public with sharing class new_meeting {
         /**
          * get access item data
          */
-        for(Related_Access__c r : [select Id, Access_Item__c, Room__c from Related_Access__c where Room__c = :room]){
+        List<Related_Access__c> relatedAccessList = [select Id, Access_Item__c, Access_Item__r.Name, Room__c, Room__r.Name from Related_Access__c where Room__c = :room];
+        /*for(Related_Access__c r : relatedAccessList){
             Map<String, Object> tmp = new Map<String, Object>();
             tmp.put('id', r.Id);
             tmp.put('accessItem', r.Access_Item__c);
             tmp.put('room', r.Room__c);
             
             relatedAccesses.add(tmp);
-        }
+        }*/
         
         /**
          * get meeting data send to gallagher
@@ -109,13 +110,18 @@ public with sharing class new_meeting {
                                          Subject__c, 
                                          Description__c, 
                                          Host__c, 
+                                         Host__r.LastName,
+                                         Host__r.FirstName,
                                          Guest__c,
+                                         Guest__r.LastName,
+                                         Guest__r.FirstName,
                                          Guest__r.ID_Number__c, 
                                          Guest__r.MailingStreet, 
                                          Guest__r.MailingCity, 
                                          Guest__r.MailingState, 
                                          Guest__r.MailingCountry, 
-                                         Room__c
+                                         Room__c,
+                                         Room__r.Name
                                          from Meeting__c where Id in :meetings
                                         ];
         for(Meeting__c m : meetingDatas){
@@ -134,8 +140,17 @@ public with sharing class new_meeting {
             datas.add(maps);
         }
         
+        /*System.debug(String.valueOf(datas));
+        System.debug(EncodingUtil.urlEncode(String.valueOf(datas), 'UTF-8'));
         System.debug(JSON.serialize(datas));
-        //sendToGallagher(JSON.serialize(datas));
+        sendToGallagher(JSON.serialize(datas));*/
+        
+        generateUrlParam(meetingDatas, relatedAccessList);
+        
+        /*String urlParam = generateUrlParam(meetingDatas, relatedAccessList);
+        System.debug(urlParam);
+        sendToGallagher(urlParam);*/
+        System.debug('pass');
         
         /**
          * get host timezone
@@ -173,7 +188,7 @@ public with sharing class new_meeting {
         }
        
         /**
-       	 * send email invitation to guests
+         * send email invitation to guests
          */
         for(Meeting__c g : meetings){
                 System.debug(g);
@@ -190,24 +205,119 @@ public with sharing class new_meeting {
     }
     
     @future(callout=true)
-    private static void sendToGallagher(String meetings){
+    private static void sendToGallagher(String param){
         Http http = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndpoint('http://182.253.1.69:9080/maximo/rest/os/VMSMEETING/?_format=json&_lid=wilson&_lpwd=wilson');
+        request.setEndpoint('http://182.253.1.69:9080/maximo/rest/os/VMSMEETING/?_format=json&_lid=wilson&_lpwd=wilson&action=addChange&' + param);
+        //request.setEndpoint('http://xl-wms.hol.es/get.php?test=test');
         request.setMethod('POST');
         request.setHeader('Content-Type', 'application/json;charset=UTF-8');
-        request.setBody(meetings);
         HttpResponse response = http.send(request);
         System.debug(response.getBody());
         if(response.getStatusCode() == 200){
             System.debug('rest success');
-            //return true;
         }
-        //return false;
+    }
+    
+    private static void generateUrlParam(Meeting__c[] meetings, Related_Access__c[] relatedAccess){
+        //String data = 'roomname=' +  EncodingUtil.urlEncode(meetings[0].Room__r.Name, 'UTF-8') + '&';
+        String data = '';
+        
+        /**
+         * generate related access
+         */
+        for(Related_Access__c r : relatedAccess){
+            data += 'talrelatedaccess.' + r.Id + '.room=' + EncodingUtil.urlEncode(r.Room__r.Name, 'UTF-8') + '&';
+            data += 'talrelatedaccess.' + r.Id + '.accessItem=' + EncodingUtil.urlEncode(r.Access_Item__r.Name, 'UTF-8') + '&';
+            data += 'talrelatedaccess.' + r.Id + '.id=' + EncodingUtil.urlEncode(r.Id, 'UTF-8') + '&';
+        }
+        
+        /**
+         * generate meeting
+         */
+        for(Meeting__c m : meetings){
+            String toSend = data;
+            
+            String address = '';
+            String hostName = '';
+            String idNumber = '';
+            
+            if(m.Guest__r.MailingStreet != null){
+                address += EncodingUtil.urlEncode(', ' + m.Guest__r.MailingStreet, 'UTF-8');
+            }
+            
+            if(m.Guest__r.MailingCity != null){
+                address += EncodingUtil.urlEncode(', ' + m.Guest__r.MailingCity, 'UTF-8');
+            }
+            
+            if(m.Guest__r.MailingState != null){
+                address += EncodingUtil.urlEncode(', ' + m.Guest__r.MailingState, 'UTF-8');
+            }
+            
+            if(m.Guest__r.MailingCountry != null){
+                address += EncodingUtil.urlEncode(', ' + m.Guest__r.MailingCountry, 'UTF-8');
+            }
+            
+            if(m.Host__r.LastName != null){
+                hostName += EncodingUtil.urlEncode(', ' + m.Host__r.LastName, 'UTF-8');
+            }
+            
+            if(m.Host__r.FirstName != null){
+                hostName += EncodingUtil.urlEncode(', ' + m.Host__r.FirstName, 'UTF-8');
+            }
+            
+            if(m.Guest__r.ID_Number__c != null){
+                idNumber += EncodingUtil.urlEncode(m.Guest__r.ID_Number__c, 'UTF-8');
+            }
+            
+            toSend += 'roomnumber=' + EncodingUtil.urlEncode(m.Room__r.Name, 'UTF-8') + '&';
+            toSend += 'address=' +  address + '&';
+            toSend += 'idnumber=' + idNumber + '&';
+            toSend += 'host=' + hostName + '&';
+            toSend += 'description=' + EncodingUtil.urlEncode(m.Description__c, 'UTF-8') + '&';
+            toSend += 'subject=' + EncodingUtil.urlEncode(m.Subject__c, 'UTF-8') + '&';
+            toSend += 'fromdate=' + EncodingUtil.urlEncode(parsing(m.Start_Meeting__c), 'UTF-8') + '&';
+            toSend += 'todate=' + EncodingUtil.urlEncode(parsing(m.End_Meeting__c), 'UTF-8') + '&';
+            toSend += 'sfmeetingId=' + EncodingUtil.urlEncode(m.Id, 'UTF-8') + '&';
+            
+            System.debug(toSend);
+            sendToGallagher(toSend);
+        }
     }
     
     @AuraEnabled
     public static boolean test(){
         return true;
+    }
+    
+    private static String parsing(Datetime mtime){
+        String day = mtime.dayGMT()+'';
+        String month = mtime.monthGMT()+'';
+        String year = mtime.yearGMT()+'';
+        String hour = mtime.hourGMT()+'';
+        String minute = mtime.minuteGMT()+'';
+        String second = mtime.secondGMT()+'';
+        
+        if(day.length() == 1){
+            day = '0'+day;
+        }
+        
+        if(month.length() == 1){
+            month = '0'+month;
+        }
+        
+        if(hour.length() == 1){
+            hour = '0'+hour;
+        }
+        
+        if(minute.length() == 1){
+            minute = '0'+minute;
+        }
+        
+        if(second.length() == 1){
+            second = '0'+second;
+        }
+        
+        return year + '-' + month + '-' + day + 'T' + hour + ':' + minute + ':' + second + '+00:00';
     }
 }
