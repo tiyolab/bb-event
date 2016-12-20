@@ -46,7 +46,27 @@
     },
     
     onFilterClicked : function(component, event, helper){
+    	var contacts = component.get("v.contacts");
+        var contactMaps = component.get("v.contactMaps");
+        var contactId = '';
+        var toMeet = component.get("v.toMeet");
+        var x = event.getSource().get("v.body");
         
+        x.forEach(function(value, index){
+            console.log("Local ID = " + value.getLocalId());
+            if(value.getLocalId() == 'filter-result-value'){
+                contactId = value.get("v.value");
+            }
+        });
+        console.log("Contact Id = " + contactId);
+        if(contactId != ''){
+            $('#host').val('');
+            toMeet.push(contactMaps[contactId]);
+            contacts = [];
+            console.log(toMeet);
+            component.set("v.toMeet", toMeet);
+            component.set("v.contacts", contacts);
+        }
     }
 	
 })

@@ -6,6 +6,7 @@
     <aura:attribute name="searchString" type="String" />
     <aura:attribute name="contacts" type="Contact[]" />
     <aura:attribute name="contactMaps" type="Map" default="{}" />
+    <aura:attribute name="toMeet" type="Contact[]" />
     <!-- / ATTRIBUTES -->
     
     <!-- VISITOR REGISTRATION FORM -->
@@ -49,7 +50,7 @@
                                         	<ui:button class="slds-lookup__item-action slds-media slds-media--center guest-filter-result" aura:id="{contact.Id}" press="{!c.onFilterClicked}">                                                
                                                 <div class="slds-media__body">
                                                 	<div class="slds-lookup__result-text">
-                                                        <ui:outputText value="{!contact.FirstName + ' ' + !contact.LastName}" />
+                                                        <ui:outputText aura:id="filter-result-value" value="{!contact.FirstName + ' ' + !contact.LastName}" />
                                                         <span class="slds-lookup__result-meta slds-text-body--small">{!contact.Email}</span>
                                                     </div>
                                                 </div>
@@ -59,6 +60,21 @@
                                 </ul>
                             </div>
                             <!-- / SEARCH RESULT -->
+                            
+                            <!-- SELECTED CONTACT -->
+                            <div>
+                            	<aura:iteration items="v.toMeet" var="toMeet">
+                                	<span class="slds-pill">
+                                    	<div class="slds-tile">
+                                        	<h3 class="slds-truncate" title="Salesforce UX"><a href="javascript:void(0);">{!toMeet.FirstName} {!toMeet.LastName}</a></h3>
+                                            <div class="slds-tile__detail slds-text-body--small">
+                                                <p class="slds-truncate" title="emailToMeet">{!toMeet.Email}</p>
+                                            </div>
+                                        </div>
+                                    </span>
+                                </aura:iteration>
+                            </div>
+                            <!-- / SELECTED CONTACT -->
                         </div>
                     </div>
                     

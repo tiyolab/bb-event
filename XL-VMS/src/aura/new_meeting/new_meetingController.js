@@ -57,6 +57,9 @@
     },
     
     openModal : function(component, event, helper){
+        var isRoomLoaded = false;
+        var isTimeZoneLoaded = false;
+        
         /**
          * show spinner
          */
@@ -72,15 +75,53 @@
             if(component.isValid() && response.getState() == 'SUCCESS'){
                 if(response.getReturnValue() != null){
                     component.set('v.rooms', response.getReturnValue());
+                    
+                    var roomMap = {};
+                    response.getReturnValue().forEach(function(room, index){
+                        roomMap[room.Id] = room.Name;
+                    });
+                    
+                    component.set('v.roomMap', roomMap);
                 }
             }
             
             /**
              * hide spinner
              */
-            helper.showSpinner(component, false);
+            isRoomLoaded = true;
+            if(isRoomLoaded && isTimeZoneLoaded){
+            	helper.showSpinner(component, false);    
+            }
+            
         });
         $A.enqueueAction(action);
+        
+        /**
+         * Get User Timezone
+         */
+        if(component.get('v.timeZone') == ''){
+            var action2 = component.get('c.getTimeZone');
+            action2.setCallback(this, function(response){
+                if(component.isValid() && response.getState() == 'SUCCESS'){
+                    if(response.getReturnValue() != null && response.getReturnValue() != ''){
+                        component.set('v.timeZone', response.getReturnValue());
+                    }else{
+                        component.set('v.timeZone', 'Asia/Jakarta');
+                    }
+                }else{
+                    component.set('v.timeZone', 'Asia/Jakarta');
+                }
+                
+                /**
+                 * hide spinner
+                 */
+                isTimeZoneLoaded = true;
+                if(isRoomLoaded && isTimeZoneLoaded){
+                    helper.showSpinner(component, false);    
+                }
+            });
+            $A.enqueueAction(action2);
+        }
         
         $("#create-meeting-modal").css('display', 'block');
     },
@@ -92,6 +133,112 @@
         component.set('start_meeting', '');
         component.set('end_meeting', '');
         component.set('v.guests', []);
+    },
+    
+    selectRoom : function(component, event, helper){
+        console.log(event.getSource().get('v.label'));
+        return false;
+        component.set('v.selectedRoomName', event.getSource().get('v.label'));
+    },
+    
+    sendToCalendar : function(component, event, helper){
+        var newMeeting = {};
+        newMeeting['sobjectType'] = 'Meeting__c';
+        newMeeting['Subject__c'] = component.find('subject').get('v.value');
+        newMeeting['Room_Name'] = component.get('v.roomMap')[component.find('selected_room').get('v.value')];
+        newMeeting['Description__c'] = component.find('description').get('v.value');
+        newMeeting['Start_Meeting__c'] = component.find('start_meeting').get('v.value');
+        newMeeting['End_Meeting__c'] = component.find('end_meeting').get('v.value');
+        
+        /**
+         * generate guest
+         */
+        var guests_contact = component.get('v.guests');
+        var guestsEmail = [];            
+        guests_contact.forEach(function(guest, index){
+            guestsEmail.push({'email' : guest.Email});
+        });
+        
+        /**
+         * send event to calendar_component_v2
+         */
+        var evt = component.getEvent('createMeeting');
+        evt.setParams({
+            'meeting' : newMeeting,
+            'guests_email' : JSON.stringify(guestsEmail),
+            'timezone' : component.get('v.timeZone')
+        });
+        evt.fire();
+    },
+    
+    saveToServer : function(component, event, helper){
+        var eventId = event.getParam('eventId');
+        var updatedAt = event.getParam('updatedAt');
+        
+        var meetings = [];
+        
+        /**
+         * show spinner
+         */
+        helper.showSpinner(component, true);
+        
+        var action = component.get('c.createNewMeeting2');
+        action.setParams({
+            'subject' : component.find('subject').get('v.value'),
+            'description' : component.find('description').get('v.value'),
+            'startMeeting' : component.find('start_meeting').get('v.value'),
+            'endMeeting' : component.find('end_meeting').get('v.value'),
+            'attendees' : component.get('v.guests'),
+            'room' : component.find('selected_room').get('v.value'),
+            'eventId' : eventId,
+            'updatedAt' : updatedAt
+        });
+        
+        action.setCallback(this, function(response){
+            if(component.isValid() && response.getState() == 'SUCCESS'){
+                if(response.getReturnValue() != null){
+                    /**
+                     * render event to calendar
+                     */
+                    var start_meeting = response.getReturnValue()[0].Start_Meeting__c;
+                    var end_meeting = response.getReturnValue()[0].End_Meeting__c;
+                                
+                    var newMeeting = {
+                        title : component.find('subject').get('v.value'),
+                        start : start_meeting,
+                        end : end_meeting,
+                        id : eventId
+                    }
+                    
+                    $("#calendar").fullCalendar('renderEvent', newMeeting, true);
+                    
+                    /**
+                     * clear guest
+                     */
+                    component.set('v.guests', []);
+                    
+                    /**
+                     * clear input field
+                     */
+                    component.find('subject').set('v.value', '');
+                    component.find('description').set('v.value', '');
+                    
+                    /**
+                     * close dialog
+                     */
+                    $("#create-meeting-modal").css('display', 'none');
+                }else{
+                    alert('Meeting not created');
+                }
+            }
+            
+            /**
+             * hide spinner
+             */
+            helper.showSpinner(component, false);
+        });
+        
+        $A.enqueueAction(action);
     },
     
     create_new_meeting : function(component, event, helper){

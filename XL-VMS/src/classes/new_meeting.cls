@@ -15,6 +15,145 @@ public with sharing class new_meeting {
     }
     
     @AuraEnabled
+    public static String getTimeZone(){
+        /**
+         * get host timezone
+         */
+        User u = [select TimeZoneSidKey from User where Id =:UserInfo.getUserId()];
+        
+        return u.TimeZoneSidKey;
+    }
+    
+    @AuraEnabled
+    public static List<Meeting__c> createNewMeeting2(String subject, 
+                                                        String description, 
+                                                        DateTime startMeeting, 
+                                                        DateTime endMeeting, 
+                                                        Contact[] attendees, 
+                                                        String room,
+                                                        String eventId,
+                                                        String updatedAt){
+        List<Contact> newContact = new List<Contact>();
+        List<Contact> savedContact = new List<Contact>();
+        List<Meeting__c> meetings = new List<Meeting__c>();
+        
+        /**
+         * data send to gallgher
+         */
+        List<Map<String, Object>> relatedAccesses = new List<Map<String, Object>>();
+        
+        Savepoint sp = Database.setSavepoint();
+    
+        /**
+         * filter between saved contact and todo saved contact (new contact as guest)
+         */
+        for(Contact c : attendees){
+            String tmpId = String.valueOf(c.Id);
+            if(tmpId == null || tmpId == ''){
+                c.LastName = 'Guest';
+                c.ID_Type__c = 'Government ID';
+                newContact.add(c);
+            }else{
+                savedContact.add(c);
+            }
+        }     
+
+        /**
+         * save new contact
+         */
+        try{
+            insert newContact;    
+        }catch(DMLException e){
+            Database.rollback(sp);
+            return null;
+        }
+        
+        /**
+         * merge saved contact and new contact
+         */
+        savedContact.addAll(newContact);
+        
+        /**
+         * save meeting data
+         */
+        String userEmail = UserInfo.getUserEmail();
+        Contact[] host = [select Id from Contact where Email = :userEmail];
+        
+        if(host.size() > 0){
+            for(Contact ct : savedContact){
+                meetings.add(
+                    new Meeting__c(
+                        Host__c = host[0].Id, 
+                        Guest__c = ct.Id,
+                        Subject__c = subject, 
+                        Description__c = description, 
+                        Start_Meeting__c = startMeeting,
+                        End_Meeting__c = endMeeting, 
+                        Room__c = room,
+                        Event_Id__c = eventId,
+                        Last_Updated_At__c = updatedAt));
+            }
+            
+            try{
+                insert meetings;
+            }catch(DMLException e){
+                Database.rollback(sp);
+                return null;    
+            }
+        }else{
+            Database.rollback(sp);
+            return null;
+        }
+                                                            
+		/**
+         * send email invitation to guests
+         */
+        for(Meeting__c g : meetings){
+                Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();    
+                mail.setTargetObjectId(g.Guest__c);
+                mail.setTemplateId('00X28000001G2ZQ');
+                mail.setSenderDisplayName('XL Meeting Invitation');
+                mail.setWhatId(g.Id);
+                mail.setSaveAsActivity(false);
+                Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});
+        }
+        
+        /**
+         * get access item data
+         */
+        List<Related_Access__c> relatedAccessList = [select Id, Access_Item__c, Access_Item__r.Name, Room__c, Room__r.Name from Related_Access__c where Room__c = :room];
+        
+        /**
+         * get meeting data send to gallagher
+         */
+        List<Meeting__c> meetingDatas = [select 
+                                         Id, 
+                                         Start_Meeting__c, 
+                                         End_Meeting__c, 
+                                         Subject__c, 
+                                         Description__c, 
+                                         Host__c, 
+                                         Host__r.LastName,
+                                         Host__r.FirstName,
+                                         Guest__c,
+                                         Guest__r.LastName,
+                                         Guest__r.FirstName,
+                                         Guest__r.ID_Number__c, 
+                                         Guest__r.MailingStreet, 
+                                         Guest__r.MailingCity, 
+                                         Guest__r.MailingState, 
+                                         Guest__r.MailingCountry, 
+                                         Room__c,
+                                         Room__r.Name
+                                         from Meeting__c where Id in :meetings
+                                        ];
+        
+        generateUrlParam(meetingDatas, relatedAccessList);
+                           
+        return meetingDatas;
+    }
+    
+    @AuraEnabled
     public static Map<String, object> createNewMeeting(String subject, String description, DateTime startMeeting, DateTime endMeeting, Contact[] attendees, String room){
         List<Contact> newContact = new List<Contact>();
         List<Contact> savedContact = new List<Contact>();
@@ -159,7 +298,8 @@ public with sharing class new_meeting {
         
         Map<String, object> toReturn = new Map<String, object>();
         toReturn.put('timezone', u.TimeZoneSidKey);
-        toReturn.put('meetings', meetings);
+        //toReturn.put('meetings', meetings);
+        toReturn.put('meetings', meetingDatas);
         toReturn.put('sendGallagher', JSON.serialize(datas));
         
         return toReturn;

@@ -111,5 +111,14 @@
             'meetings' : meetings
         });
         event.fire();
+    },
+    
+    saveToServer : function(eventId, updatedAt){
+        var event = $A.get('e.c:eventSendEventIdAndUpdatedTime');
+        event.setParams({
+            'eventId' : eventId,
+            'updatedAt' : updatedAt
+        });
+        event.fire();
     }
 })

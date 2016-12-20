@@ -1,4 +1,14 @@
 ({  
+    init : function(component, event, helper){
+        console.log('in component');
+        var d1 = new Date('2016-12-19T10:01:12.000+0000');
+        var d2 = new Date('2016-12-19T09:09:08.966Z');
+        
+        console.log('di = ' + d1.getTime());
+        console.log('d2 = ' + d2.getTime());
+        //document.getElementById('iframe').contentWindow.test_function(component);
+    },
+    
     initCalendar : function(component, event, helper) {
         $("#calendar").fullCalendar({
             header: {
@@ -27,7 +37,50 @@
                 helper.detailMeeting(component, event.id);
             }
         })
+        
+        console.log('ccv2');
 	},
+    
+    handlerCreateMeeting : function(component, event, helper){
+        /**
+         * show spinner
+         */
+        component.set('v.showSpinner', true);
+        
+        var meeting = event.getParam('meeting');
+        var attendees = JSON.parse(event.getParam('guests_email'));
+        var timezone = event.getParam('timezone');
+        
+        var meetingMetadata = {
+            'subject' : meeting.Subject__c,
+            'room' : meeting.Room_Name,
+            'description' : meeting.Description__c,
+            'start_meeting' : meeting.Start_Meeting__c,
+            'end_meeting' : meeting.End_Meeting__c,
+            'attendees' : attendees,
+            'timezone' : timezone
+        }
+        
+        /**
+         * send meeting metadata to iframe to save to google calendar api
+         */
+        document.getElementById('iframe').contentWindow.createCalendarEvent(meetingMetadata, component, function(status, eventCreated){
+            if(status){
+            	/**
+            	 * save event id from calendar api to related meetings
+            	 */
+                
+                helper.saveToServer(eventCreated.id, eventCreated.updated);
+                
+            }else{
+                alert('Meeting not created');
+            }
+            /**
+             * close spinner
+             */
+            component.set('v.showSpinner', false);
+        });
+    },
     
     handle_response_create_meeting : function(component, event, helper){
         var that = this;
@@ -42,7 +95,7 @@
         
         var meetingMetadata = {
             'subject' : meetings[0].Subject__c,
-            'room' : meetings[0].Room__c,
+            'room' : meetings[0].Room__r.Name,
             'description' : meetings[0].Description__c,
             'start_meeting' : meetings[0].Start_Meeting__c,
             'end_meeting' : meetings[0].End_Meeting__c,
@@ -58,6 +111,9 @@
             	/**
             	 * save event id from calendar api to related meetings
             	 */
+                console.log(eventCreated);
+                return false;
+                
                 meetings.forEach(function(meeting, index){
                 	meeting.Event_Id__c = eventCreated.id;    
                 });
@@ -188,6 +244,6 @@
     },
     
     test_function : function(component){
-        console.log(component.get('v.showSpinner'));
+        
     }
 })

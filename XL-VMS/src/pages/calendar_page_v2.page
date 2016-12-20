@@ -12,6 +12,7 @@
         
         
         <script>
+        		var component;
         		var calendarEventsObject = [];
             	var clientID = '687607039990-tpfj9bgr7r20vlgltoi070gji02egc9p.apps.googleusercontent.com';
                 var calendarScopes = ["https://www.googleapis.com/auth/calendar"];
@@ -108,6 +109,8 @@
                         * run parent static resource javascript
                         */
                         window.parent.setEventsToCalendar(calendarEventsObject);
+                        
+                        console.log('calling cmp');
                     });
                 }
             
@@ -230,8 +233,10 @@
                     });
                 }
         
-        		function test_function(){
-                    
+        		function test_function(cmp){
+                    console.log('vfp');
+                    console.log(cmp);
+                    component = cmp;
                 }
             
         </script>

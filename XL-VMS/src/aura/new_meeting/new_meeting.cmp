@@ -8,12 +8,15 @@
     <aura:attribute name="rooms" type="Room__c[]"/>
     <aura:attribute name="start_meeting" type="String"/>
     <aura:attribute name="end_meeting" type="String"/>
+    <aura:attribute name="timeZone" type="String" default=""/>
+    <aura:attribute name="roomMap" type="Map" default="{}"/>
     
-    <aura:registerEvent name="response_create_meeting" type="c:event_response_create_meeting"/>
+    <aura:registerEvent name="createMeeting" type="c:eventCreateMeeting"/>
     <aura:registerEvent name="toggle_spinner" type="c:event_toggle_spinner" />
     
     <aura:handler event="c:event_open_create_meeting" action="{!c.openModal}"/>
     <aura:handler event="c:event_update_eventid" action="{!c.updateEventId}"/>
+    <aura:handler event="c:eventSendEventIdAndUpdatedTime" action="{!c.saveToServer}"/>
     
     <style>
         .guest-filter-result{
@@ -167,7 +170,7 @@
                               </div>
                             </fieldset>
                             <fieldset class="slds-form--compound">
-                                <ui:button class="slds-button slds-button--brand" label="Save" press="{!c.create_new_meeting}"/>
+                                <ui:button class="slds-button slds-button--brand" label="Save" press="{!c.sendToCalendar}"/>
                             </fieldset>
                         </div>
                       <!-- END OF CONTENT -->

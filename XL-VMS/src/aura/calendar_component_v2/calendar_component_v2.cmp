@@ -5,10 +5,11 @@
     
     <aura:attribute name="showSpinner" type="Boolean" default="true"/>
     
-    <aura:handler name="response_create_meeting" event="c:event_response_create_meeting" action="{!c.handle_response_create_meeting}"/>
+    <aura:handler name="createMeeting" event="c:eventCreateMeeting" action="{!c.handlerCreateMeeting}"/>
     <aura:handler name="response_edit_meeting" event="c:event_response_edit_meeting" action="{!c.handle_response_edit_meeting}"/>
     <aura:handler name="delete_meeting" event="c:event_delete_meeting" action="{!c.handle_delete_meeting}"/>
     <aura:handler name="toggle_spinner" event="c:event_toggle_spinner" action="{!c.handle_toggle_spinner}"/>
+    <aura:handler name="init" value="{!this}" action="{!c.init}"/>
     
     <head>
         <ltng:require styles="{!$Resource.full_calendar + '/fullcalendar-3.0.1/fullcalendar.css'}"/>
