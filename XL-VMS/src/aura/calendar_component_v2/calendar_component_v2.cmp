@@ -1,7 +1,6 @@
 <aura:component implements="forceCommunity:availableForAllPageTypes" access="global" controller="new_meeting">
     <aura:registerEvent name="open_detail_meeting" type="c:event_open_detail_meeting"/>
     <aura:registerEvent name="open_create_meeting" type="c:event_open_create_meeting"/>
-    <aura:registerEvent name="update_eventid" type="c:event_update_eventid"/>
     
     <aura:attribute name="showSpinner" type="Boolean" default="true"/>
     
@@ -9,7 +8,6 @@
     <aura:handler name="response_edit_meeting" event="c:event_response_edit_meeting" action="{!c.handle_response_edit_meeting}"/>
     <aura:handler name="delete_meeting" event="c:event_delete_meeting" action="{!c.handle_delete_meeting}"/>
     <aura:handler name="toggle_spinner" event="c:event_toggle_spinner" action="{!c.handle_toggle_spinner}"/>
-    <aura:handler name="init" value="{!this}" action="{!c.init}"/>
     
     <head>
         <ltng:require styles="{!$Resource.full_calendar + '/fullcalendar-3.0.1/fullcalendar.css'}"/>
@@ -19,7 +17,7 @@
                                $Resource.full_calendar + '/fullcalendar-3.0.1/fullcalendar.js')}"
                       afterScriptsLoaded="{!c.initCalendar}"/>
         
-        <ltng:require scripts="{!$Resource.calendar_v2}"/>
+        <ltng:require scripts="{!$Resource.calendar_v2}" afterScriptsLoaded="{!c.init}"/>
         
         <style>
             iframe{
@@ -29,6 +27,7 @@
         
     </head>
     <body>
+        <ui:button label="test" press="{!c.test_function}"/>
         <!-- SPINNER COMPONENT -->
         <c:my_spinner_loading width="100" height="100" show="{!v.showSpinner}" />
         <!-- END OF SPINNER COMPONENT -->

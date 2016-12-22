@@ -15,7 +15,6 @@
     <aura:registerEvent name="toggle_spinner" type="c:event_toggle_spinner" />
     
     <aura:handler event="c:event_open_create_meeting" action="{!c.openModal}"/>
-    <aura:handler event="c:event_update_eventid" action="{!c.updateEventId}"/>
     <aura:handler event="c:eventSendEventIdAndUpdatedTime" action="{!c.saveToServer}"/>
     
     <style>

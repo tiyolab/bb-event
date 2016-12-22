@@ -46,6 +46,7 @@ public with sharing class edit_meeting {
         List<Contact> savedContact = new List<Contact>();
         List<Meeting__c> deleteMeeting = new List<Meeting__c>();
         List<Meeting__c> newMeeting = new List<Meeting__c>();
+		//Map<Id, Id> newGuestIds = new Map<Id, Id>();
         
         Savepoint sp = Database.setSavepoint();
         
@@ -101,6 +102,8 @@ public with sharing class edit_meeting {
                         End_Meeting__c = endMeeting, 
                         Room__c = room,
                 		Event_Id__c = eventId));
+                
+                //newGuestIds.put(c.Id, oldMeeting[0].Host__c);
             }   
         }                      
                                    
@@ -141,6 +144,48 @@ public with sharing class edit_meeting {
             Database.rollback(sp);
             return null;
         }
+                                          
+		/**
+		 * Get related access list of this meeting room
+		 */
+		List<Related_Access__c> relatedAccessList = [select Id, Access_Item__c, Access_Item__r.Name, Room__c, Room__r.Name from Related_Access__c where Room__c = :room];
+		
+		/**
+		 * Get new meeting id
+		 */
+		/*List<String> newMeetingIds = new List<String>();
+		for(Meeting__c m : newMeeting){
+            if(newGuestIds.get(m.Guest__c) != null){
+                newMeetingIds.add(m.Id);
+            }
+        }*/
+                                          
+		/**
+         * get meeting data send to gallagher
+         */
+        List<Meeting__c> meetingDatas = [select 
+                                         Id, 
+                                         Start_Meeting__c, 
+                                         End_Meeting__c, 
+                                         Subject__c, 
+                                         Description__c, 
+                                         Host__c, 
+                                         Host__r.LastName,
+                                         Host__r.FirstName,
+                                         Guest__c,
+                                         Guest__r.LastName,
+                                         Guest__r.FirstName,
+                                         Guest__r.ID_Number__c, 
+                                         Guest__r.MailingStreet, 
+                                         Guest__r.MailingCity, 
+                                         Guest__r.MailingState, 
+                                         Guest__r.MailingCountry, 
+                                         Room__c,
+                                         Room__r.Name
+                                         from Meeting__c where Id in :newMeeting
+                                        ];
+                                          
+		new_meeting.generateUrlParam(meetingDatas, relatedAccessList);
         
         /**
          * get host timezone

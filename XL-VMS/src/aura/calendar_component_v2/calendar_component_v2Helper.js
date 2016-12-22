@@ -69,48 +69,6 @@
             'eventId' : event_id
         });
         event.fire();
-        
-        /**
-         * open edit modal
-         */
-        //$("#edit-meeting-modal").css('display', 'block');
-        
-        /**
-         * send event to edit_meeting component
-         */
-        /*var event_edit_meeting = $A.get('e.c:event_edit_meeting');
-        event_edit_meeting.setParams({
-            'event_id' : event_id
-        });
-        event_edit_meeting.fire();*/
-        
-        
-        
-        /*var action = component.get('c.getMeetingId');
-        action.setParams({
-            'eventId' : event_id
-        });
-        action.setCallback(this, function(response){
-            if(component.isValid() &&response.getState() == 'SUCCESS'){
-                if(response.getReturnValue() != null){
-                 	var id = response.getReturnValue();
-                    var navEvt = $A.get('e.force:navigateToSObject');
-                    navEvt.setParams({
-                        "recordId" : id
-                    });
-                    navEvt.fire();
-                }
-            }
-        });
-        $A.enqueueAction(action);*/
-    },
-    
-    updateEventId : function(meetings){
-        var event = $A.get('e.c:event_update_eventid');
-        event.setParams({
-            'meetings' : meetings
-        });
-        event.fire();
     },
     
     saveToServer : function(eventId, updatedAt){
@@ -120,5 +78,18 @@
             'updatedAt' : updatedAt
         });
         event.fire();
+    },
+    
+    synchronize : function(component, mapMeeting){
+        var action = component.get('c.synchronizeWithCalendar');
+        action.setParams({
+            'sdata' : JSON.stringify(mapMeeting)
+        });
+        action.setCallback(this, function(response){
+           console.log('response' + response.getReturnValue()); 
+        });
+        $A.enqueueAction(action);
+        
+        console.log('fired');
     }
 })

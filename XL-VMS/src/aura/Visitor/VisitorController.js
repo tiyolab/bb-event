@@ -22,10 +22,7 @@
         });
         
         action.setCallback(this, function(response){
-            console.log("State = " + response.getState());
-            console.log("Valid = " + component.isValid());
             if(component.isValid() && (response.getState != 'ERROR')){
-                console.log("opo");
                 if(response.getReturnValue != null){
                     var contactMaps = component.get("v.contactMaps");
                     
@@ -49,24 +46,13 @@
     	var contacts = component.get("v.contacts");
         var contactMaps = component.get("v.contactMaps");
         var contactId = '';
-        var toMeet = component.get("v.toMeet");
-        var x = event.getSource().get("v.body");
+        var sourceId = event.getSource().getLocalId();
         
-        x.forEach(function(value, index){
-            console.log("Local ID = " + value.getLocalId());
-            if(value.getLocalId() == 'filter-result-value'){
-                contactId = value.get("v.value");
-            }
-        });
-        console.log("Contact Id = " + contactId);
-        if(contactId != ''){
-            $('#host').val('');
-            toMeet.push(contactMaps[contactId]);
-            contacts = [];
-            console.log(toMeet);
-            component.set("v.toMeet", toMeet);
-            component.set("v.contacts", contacts);
-        }
+        console.log("Contact = " + contacts.length);
+        console.log("Container = " + contacts[0].Email);
+        console.log("Source = " + event.getSource().get("v.body"));
+        
+        
     }
 	
 })

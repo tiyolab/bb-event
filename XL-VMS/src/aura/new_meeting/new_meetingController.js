@@ -142,6 +142,11 @@
     },
     
     sendToCalendar : function(component, event, helper){
+        /**
+         * show spinner
+         */
+        helper.showSpinner(component, true);
+        
         var newMeeting = {};
         newMeeting['sobjectType'] = 'Meeting__c';
         newMeeting['Subject__c'] = component.find('subject').get('v.value');
@@ -177,12 +182,7 @@
         
         var meetings = [];
         
-        /**
-         * show spinner
-         */
-        helper.showSpinner(component, true);
-        
-        var action = component.get('c.createNewMeeting2');
+        var action = component.get('c.createNewMeeting');
         action.setParams({
             'subject' : component.find('subject').get('v.value'),
             'description' : component.find('description').get('v.value'),
@@ -241,72 +241,6 @@
         $A.enqueueAction(action);
     },
     
-    create_new_meeting : function(component, event, helper){
-        /**
-         * show spinner
-         */
-        helper.showSpinner(component, true);
-        
-        var action = component.get('c.createNewMeeting');
-        action.setParams({
-            'subject' : component.find('subject').get('v.value'),
-            'description' : component.find('description').get('v.value'),
-            'startMeeting' : component.find('start_meeting').get('v.value'),
-            'endMeeting' : component.find('end_meeting').get('v.value'),
-            'attendees' : component.get('v.guests'),
-            'room' : component.find('selected_room').get('v.value')
-        });
-        
-        action.setCallback(this, function(response){
-            if(component.isValid() && response.getState() == 'SUCCESS'){
-                if(response.getReturnValue() != null){
-                    var strSendToGallagher = response.getReturnValue().sendGallagher;
-                    //helper.sendToRest('http://xl-wms.hol.es/get.php', 'POST', strSendToGallagher);
-                    
-                    var guests_contact = component.get('v.guests');
-                    var guestsEmail = [];
-                    
-                    guests_contact.forEach(function(guest, index){
-                        guestsEmail.push({'email' : guest.Email});
-                    });
-                    
-                    /**
-                     * send event to calendar_component_v2
-                     */
-                    var evt = component.getEvent('response_create_meeting');
-                    evt.setParams({
-                        'meetings' : response.getReturnValue().meetings,
-                        'guests_email' : JSON.stringify(guestsEmail),
-                        'timezone' : response.getReturnValue().timezone
-                    });
-                    evt.fire();
-                    
-                    /**
-                     * clear guest
-                     */
-                    component.set('v.guests', []);
-                    
-                    /**
-                     * clear input field
-                     */
-                    component.find('subject').set('v.value', '');
-                    component.find('description').set('v.value', '');
-                    
-                    /**
-                     * close dialog
-                     */
-                    $("#create-meeting-modal").css('display', 'none');
-                }
-            }
-            
-            /**
-             * hide spinner
-             */
-            helper.showSpinner(component, false);
-        });
-        $A.enqueueAction(action);
-    },
-    
     unselect_attendess : function(component, event, helper){
         var guestId = '';
         var body = event.getSource().get('v.body');
@@ -343,31 +277,5 @@
         component.set('v.guests', guests);
         
         $('#attendees_search').val('');
-    },
-    
-    updateEventId : function(component, event, helper){
-        /**
-         * show spinner
-         */
-        helper.showSpinner(component, true);
-        
-        var meetings = event.getParam('meetings');
-        var action = component.get('c.sendEmailInvitation');
-        action.setParams({
-            'meetings' : meetings
-        });
-        action.setCallback(this, function(response){
-            if(component.isValid() && response.getState() == 'SUCCESS'){
-                if(response.getReturnValue() != null && response.getReturnValue() == true){
-                    alert('Success create meeting.');
-                }
-            }
-            
-            /**
-             * hide spinner
-             */
-            helper.showSpinner(component, false);
-        });
-        $A.enqueueAction(action);
     }
 })

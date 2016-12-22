@@ -1,4 +1,4 @@
-<apex:page showHeader="false" sidebar="false">
+<apex:page showHeader="false" sidebar="false" controller="new_meeting">
     <body>
         <div id="authorize-div" style="display: none">
           <span>Authorize access to Google Calendar API</span>
@@ -71,8 +71,7 @@
                     
                     request.execute(function(resp){
                         var events = resp.items;
-                        
-                        console.log(events);
+                        var meetings = {};
                         
                         appendPre('Upcoming events:');
                         
@@ -99,6 +98,25 @@
                                         id : event.id
                                     });
                                 }
+                                
+                                var list = [];
+                                var tmpMap = {};
+                                event.attendees.forEach(function(value, index){
+                                   	var newMeeting = {};
+                                    newMeeting['sobjectType'] = 'Meeting__c';
+                                    newMeeting['Guest__r.Email'] = value.email;
+                                    newMeeting['Status__c'] = value.responseStatus;
+                                    newMeeting['Subject__c'] = event.summary;
+                                    newMeeting['Room__c'] = event.location;
+                                    newMeeting['Description__c'] = event.description;
+                                    newMeeting['Start_Meeting__c'] = start_event;
+                                    newMeeting['End_Meeting__c'] = end_event;
+                                    newMeeting['Event_Id__c'] = event.id;
+                                    newMeeting['Last_Updated_At__c'] = event.updated;
+                                    list.push(newMeeting);
+                                    tmpMap[value.email] = newMeeting;
+                                });
+                                meetings[event.id] = list;
                             }
                             
                         } else {
@@ -109,8 +127,8 @@
                         * run parent static resource javascript
                         */
                         window.parent.setEventsToCalendar(calendarEventsObject);
+                        window.parent.synchronizeWithCalendar(meetings);
                         
-                        console.log('calling cmp');
                     });
                 }
             
@@ -233,10 +251,8 @@
                     });
                 }
         
-        		function test_function(cmp){
-                    console.log('vfp');
-                    console.log(cmp);
-                    component = cmp;
+        		function test_function(){
+                    
                 }
             
         </script>

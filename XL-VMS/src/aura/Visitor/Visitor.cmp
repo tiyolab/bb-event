@@ -4,9 +4,9 @@
     <!-- ATTRIBUTES -->
     <aura:attribute name="newContact" type="Contact" default="{'sObjectType' : 'Contact', 'Name' : '', 'ID_Number__c' : '', 'ID_Type__c' : ''}" />
     <aura:attribute name="searchString" type="String" />
-    <aura:attribute name="contacts" type="Contact[]" />
+    <aura:attribute name="contacts" type="Contact[]" default="[]" />
     <aura:attribute name="contactMaps" type="Map" default="{}" />
-    <aura:attribute name="toMeet" type="Contact[]" />
+    <aura:attribute name="toMeet" type="Contact" />
     <!-- / ATTRIBUTES -->
     
     <!-- VISITOR REGISTRATION FORM -->
@@ -39,6 +39,33 @@
                              aria-owns="global-search-list-01" role="combobox" aria-activedescendent="" aria-expanded="true" 
                              aria-autocomplete="list" value="{!v.searchString}" placeholder="Host" required="true" onkeyup="{!c.searchHost}" />
                             
+                            <!-- SELECTED CONTACT -->
+                            <!-- <div id="toMeet" style="display:none">
+                            	<aura:iteration items="v.toMeet" var="toMeet">
+                                	<span class="slds-pill">
+                                    	<div class="slds-tile">
+                                        	<h3 class="slds-truncate" title="Salesforce UX"><a href="javascript:void(0);">{!toMeet.FirstName} {!toMeet.LastName}</a></h3>
+                                            <div class="slds-tile__detail slds-text-body-small"> ditambahi "-" nang ngarep small
+                                                <p class="slds-truncate" title="emailToMeet">{!toMeet.Email}</p>
+                                            </div>
+                                        </div>
+                                    </span>
+                                </aura:iteration>
+                            </div> -->
+                            
+                            <div id="toMeet" class="slds-pill_container">
+                            	<span class="slds-pill slds-size--9-of-10 slds-float--left">
+                                	<span class="slds-pill__label" title="Salesforce.com, Inc.">
+                                    	{!v.toMeet.FirstName} {!v.toMeet.LastName}
+                                    </span>
+                                </span>
+                                
+                                <button class="slds-button slds-button--icon slds-pill__remove slds-float--right slds-m-around--xx-small" title="Remove">
+                                	x
+                                </button>
+                            </div>
+                            <!-- / SELECTED CONTACT -->
+                            
                             <!-- SEARCH RESULT -->
                             <div>
                             	<div class="slds-lookup__item--label slds-text-body--small" id="loading_info" style="display:none">Searching...</div>
@@ -47,7 +74,7 @@
                                 <ul id="listContact">
 									<aura:iteration items="{!v.contacts}" var="contact">
                                     	<li role="presentation">
-                                        	<ui:button class="slds-lookup__item-action slds-media slds-media--center guest-filter-result" aura:id="{contact.Id}" press="{!c.onFilterClicked}">                                                
+                                        	<ui:button class="slds-lookup__item-action slds-media slds-media--center guest-filter-result" aura:id="{!contact.Id}" press="{!c.onFilterClicked}">                                                
                                                 <div class="slds-media__body">
                                                 	<div class="slds-lookup__result-text">
                                                         <ui:outputText aura:id="filter-result-value" value="{!contact.FirstName + ' ' + !contact.LastName}" />
@@ -61,20 +88,7 @@
                             </div>
                             <!-- / SEARCH RESULT -->
                             
-                            <!-- SELECTED CONTACT -->
-                            <div>
-                            	<aura:iteration items="v.toMeet" var="toMeet">
-                                	<span class="slds-pill">
-                                    	<div class="slds-tile">
-                                        	<h3 class="slds-truncate" title="Salesforce UX"><a href="javascript:void(0);">{!toMeet.FirstName} {!toMeet.LastName}</a></h3>
-                                            <div class="slds-tile__detail slds-text-body--small">
-                                                <p class="slds-truncate" title="emailToMeet">{!toMeet.Email}</p>
-                                            </div>
-                                        </div>
-                                    </span>
-                                </aura:iteration>
-                            </div>
-                            <!-- / SELECTED CONTACT -->
+                            
                         </div>
                     </div>
                     
