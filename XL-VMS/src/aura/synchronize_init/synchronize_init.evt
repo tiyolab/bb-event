@@ -1,0 +1,4 @@
+<aura:event type="APPLICATION" description="event sent to new meeting component just act as trigger to run action to server"
+            access="global">
+    <aura:attribute name="data" type="String"/>
+</aura:event>

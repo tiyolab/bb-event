@@ -1,4 +1,4 @@
-<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" controller="new_meeting">
+<aura:component implements="forceCommunity:availableForAllPageTypes" access="global" controller="calendar_component_v2">
     <aura:registerEvent name="open_detail_meeting" type="c:event_open_detail_meeting"/>
     <aura:registerEvent name="open_create_meeting" type="c:event_open_create_meeting"/>
     
@@ -8,6 +8,7 @@
     <aura:handler name="response_edit_meeting" event="c:event_response_edit_meeting" action="{!c.handle_response_edit_meeting}"/>
     <aura:handler name="delete_meeting" event="c:event_delete_meeting" action="{!c.handle_delete_meeting}"/>
     <aura:handler name="toggle_spinner" event="c:event_toggle_spinner" action="{!c.handle_toggle_spinner}"/>
+    <aura:handler name="synchronizeBack" event="c:synchronize_back" action="{!c.handleSynchronizeBack}"/>
     
     <head>
         <ltng:require styles="{!$Resource.full_calendar + '/fullcalendar-3.0.1/fullcalendar.css'}"/>

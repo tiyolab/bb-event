@@ -190,38 +190,61 @@
             'oldMeeting' : component.get('v.old_meeting')
         });
         action.setCallback(this, function(response){
-            console.log(response.getReturnValue());
+            var isHide = true;
+            
             if(component.isValid() && response.getState() == 'SUCCESS'){
                 if(response.getReturnValue() != null){
+                    isHide = false;
+                    
                     var meetings = response.getReturnValue().meetings;
                     var timezone = response.getReturnValue().timezone;
+                    var params = response.getReturnValue().params;
                     
-                    var guest = component.get('v.guests');
-                    var guestEmail = [];
-                    guest.forEach(function(value){
-                        guestEmail.push({
-                            'email' : value.Email
-                        });
+                    var actionG = component.get('c.sendToGallagher');
+                    actionG.setParams({
+                        'params' : params
                     });
-                    
-                    var event = component.getEvent('response_edit_meeting');
-                    event.setParams({
-                        'meetings' : meetings,
-                        'timezone' : timezone,
-                        'guests_email' : JSON.stringify(guestEmail)
+                    actionG.setCallback(this, function(response2){
+                        console.log('response = ' + response2.getReturnValue());
+                        
+                        if(response2.getReturnValue()){
+                            var guest = component.get('v.guests');
+                            var guestEmail = [];
+                            guest.forEach(function(value){
+                                guestEmail.push({
+                                    'email' : value.Email
+                                });
+                            });
+                            
+                            var event = component.getEvent('response_edit_meeting');
+                            event.setParams({
+                                'meetings' : meetings,
+                                'timezone' : timezone,
+                                'guests_email' : JSON.stringify(guestEmail)
+                            });
+                            event.fire();
+                            
+                            $("#edit-meeting-modal").css('display', 'none');
+                            
+                            alert('update success');
+                        }
+                        
+                        /**
+                         * hide spinner
+                         */
+                        helper.showSpinner(component, false);   
+                        
                     });
-                    event.fire();
-                    
-                    $("#edit-meeting-modal").css('display', 'none');
-                    
-                    alert('update success');
+                    $A.enqueueAction(actionG);
                 }
             }
             
-            /**
-             * hide spinner
-             */
-            helper.showSpinner(component, false);
+            if(isHide){
+             	/**
+                 * hide spinner
+                 */
+                helper.showSpinner(component, false);   
+            }
             
         });
         $A.enqueueAction(action);

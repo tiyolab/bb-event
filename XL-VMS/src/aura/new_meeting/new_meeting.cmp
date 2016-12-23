@@ -13,9 +13,11 @@
     
     <aura:registerEvent name="createMeeting" type="c:eventCreateMeeting"/>
     <aura:registerEvent name="toggle_spinner" type="c:event_toggle_spinner" />
+    <aura:registerEvent name="synchronizeBack" type="c:synchronize_back" />
     
     <aura:handler event="c:event_open_create_meeting" action="{!c.openModal}"/>
     <aura:handler event="c:eventSendEventIdAndUpdatedTime" action="{!c.saveToServer}"/>
+    <aura:handler event="c:synchronize_init" action="{!c.handleSynchronizeInit}"/>
     
     <style>
         .guest-filter-result{

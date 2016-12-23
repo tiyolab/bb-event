@@ -6,7 +6,8 @@
     <aura:attribute name="searchString" type="String" />
     <aura:attribute name="contacts" type="Contact[]" default="[]" />
     <aura:attribute name="contactMaps" type="Map" default="{}" />
-    <aura:attribute name="toMeet" type="Contact" />
+    <aura:attribute name="toMeet" type="Contact[]" />
+    <aura:attribute name="toMeetName" type="String" />
     <!-- / ATTRIBUTES -->
     
     <!-- VISITOR REGISTRATION FORM -->
@@ -53,14 +54,14 @@
                                 </aura:iteration>
                             </div> -->
                             
-                            <div id="toMeet" class="slds-pill_container">
+                            <div id="toMeet" class="slds-pill_container slds-hide">
                             	<span class="slds-pill slds-size--9-of-10 slds-float--left">
                                 	<span class="slds-pill__label" title="Salesforce.com, Inc.">
-                                    	{!v.toMeet.FirstName} {!v.toMeet.LastName}
+                                        <p>{!v.toMeetName}</p>
                                     </span>
                                 </span>
                                 
-                                <button class="slds-button slds-button--icon slds-pill__remove slds-float--right slds-m-around--xx-small" title="Remove">
+                                <button class="slds-button slds-button--icon slds-pill__remove slds-float--right slds-m-around--xx-small" title="Remove" onclick="{!c.removeToMeet}" id="x">
                                 	x
                                 </button>
                             </div>
@@ -75,11 +76,10 @@
 									<aura:iteration items="{!v.contacts}" var="contact">
                                     	<li role="presentation">
                                         	<ui:button class="slds-lookup__item-action slds-media slds-media--center guest-filter-result" aura:id="{!contact.Id}" press="{!c.onFilterClicked}">                                                
+                                                <ui:outputText aura:id="filter-result-value" value="{!contact.Id}" class='button-value slds-hide'/>
                                                 <div class="slds-media__body">
-                                                	<div class="slds-lookup__result-text">
-                                                        <ui:outputText aura:id="filter-result-value" value="{!contact.FirstName + ' ' + !contact.LastName}" />
-                                                        <span class="slds-lookup__result-meta slds-text-body--small">{!contact.Email}</span>
-                                                    </div>
+                                                    <div class="slds-lookup__result-text"><ui:outputText value="{!contact.FirstName + ' ' + !contact.LastName}"/></div>
+                                                    <span class="slds-lookup__result-meta slds-text-body--small">{!contact.Email}</span>
                                                 </div>
                                             </ui:button>
                                         </li>

@@ -185,7 +185,7 @@ public with sharing class edit_meeting {
                                          from Meeting__c where Id in :newMeeting
                                         ];
                                           
-		new_meeting.generateUrlParam(meetingDatas, relatedAccessList);
+		List<String> generatedParam = new_meeting.generateUrlParam(meetingDatas, relatedAccessList);
         
         /**
          * get host timezone
@@ -195,8 +195,18 @@ public with sharing class edit_meeting {
         Map<String, object> toReturn = new Map<String, object>();
         toReturn.put('timezone', u.TimeZoneSidKey);
         toReturn.put('meetings', newMeeting);
+		toReturn.put('params', generatedParam);
                                           
 		return toReturn;
+    }
+    
+    @AuraEnabled
+    public static Boolean sendToGallagher(List<String> params){
+        for(String param : params){
+            new_meeting.sendToGallagher(param);
+        }   
+        
+        return true;
     }
     
     @AuraEnabled

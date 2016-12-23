@@ -1,4 +1,6 @@
 <aura:event type="APPLICATION" description="Event template" access="global">
     <aura:attribute name="eventId" type="String"/>
     <aura:attribute name="updatedAt" type="String"/>
+    <aura:attribute name="startMeeting" type="String"/>
+    <aura:attribute name="endMeeting" type="String"/>
 </aura:event>

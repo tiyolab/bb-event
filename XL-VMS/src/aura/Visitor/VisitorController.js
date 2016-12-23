@@ -46,13 +46,42 @@
     	var contacts = component.get("v.contacts");
         var contactMaps = component.get("v.contactMaps");
         var contactId = '';
-        var sourceId = event.getSource().getLocalId();
+        var sourceId = event.getSource().get("v.body");
+        var toMeet = component.get("v.toMeet");
+        var toMeetName = component.get("v.toMeetName");
         
-        console.log("Contact = " + contacts.length);
-        console.log("Container = " + contacts[0].Email);
-        console.log("Source = " + event.getSource().get("v.body"));
+        sourceId.forEach(function(value, index){
+            if(value.getLocalId() == 'filter-result-value'){
+                contactId = value.get("v.value");
+            } 
+        });
         
+        if(contactId != ''){
+            $('#host').val('');
+            toMeet.push(contactMaps[contactId]);
+            contacts = [];
+            component.set("v.toMeet", toMeet);
+            component.set("v.toMeetName", toMeet[0].FirstName + " " + toMeet[0].LastName);
+            component.set("v.contacts", contacts);
+            $('#toMeet').removeClass("slds-hide");
+            $('#host').addClass("slds-hide");
+        }
+    },
+    
+    removeToMeet : function(component, event, helper){
+        var toMeet = component.get("v.toMeet");
+        var toMeetName = component.get("v.toMeetName");
+        var contacts = component.get("v.contacts");
         
+        toMeet = [];
+        contacts = [];
+        
+        component.set("v.toMeet", toMeet);
+        component.set("v.toMeetName", toMeetName);
+        component.set("v.contacts", contacts);
+        
+        $('#toMeet').addClass("slds-hide");
+        $('#host').removeClass("slds-hide");
     }
 	
 })

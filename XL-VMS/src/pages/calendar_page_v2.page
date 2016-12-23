@@ -1,4 +1,4 @@
-<apex:page showHeader="false" sidebar="false" controller="new_meeting">
+<apex:page showHeader="false" sidebar="false">
     <body>
         <div id="authorize-div" style="display: none">
           <span>Authorize access to Google Calendar API</span>

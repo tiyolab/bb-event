@@ -71,24 +71,23 @@
         event.fire();
     },
     
-    saveToServer : function(eventId, updatedAt){
+    saveToServer : function(eventId, updatedAt, startMeeting, endMeeting){
         var event = $A.get('e.c:eventSendEventIdAndUpdatedTime');
         event.setParams({
             'eventId' : eventId,
-            'updatedAt' : updatedAt
+            'updatedAt' : updatedAt,
+            'startMeeting' : startMeeting,
+            'endMeeting' : endMeeting
         });
         event.fire();
     },
     
     synchronize : function(component, mapMeeting){
-        var action = component.get('c.synchronizeWithCalendar');
-        action.setParams({
-            'sdata' : JSON.stringify(mapMeeting)
+        var event = $A.get('e.c:synchronize_init');
+        event.setParams({
+            'data' : JSON.stringify(mapMeeting)
         });
-        action.setCallback(this, function(response){
-           console.log('response' + response.getReturnValue()); 
-        });
-        $A.enqueueAction(action);
+        event.fire();
         
         console.log('fired');
     }

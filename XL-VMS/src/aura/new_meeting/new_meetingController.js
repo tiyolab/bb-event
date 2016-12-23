@@ -179,6 +179,8 @@
     saveToServer : function(component, event, helper){
         var eventId = event.getParam('eventId');
         var updatedAt = event.getParam('updatedAt');
+        var startMeeting = event.getParam('startMeeting');
+        var endMeeting = event.getParam('endMeeting');
         
         var meetings = [];
         
@@ -195,47 +197,66 @@
         });
         
         action.setCallback(this, function(response){
+            var isHide = true;
+            console.log('callback 1');
+            console.log(response);
             if(component.isValid() && response.getState() == 'SUCCESS'){
                 if(response.getReturnValue() != null){
-                    /**
-                     * render event to calendar
-                     */
-                    var start_meeting = response.getReturnValue()[0].Start_Meeting__c;
-                    var end_meeting = response.getReturnValue()[0].End_Meeting__c;
-                                
-                    var newMeeting = {
-                        title : component.find('subject').get('v.value'),
-                        start : start_meeting,
-                        end : end_meeting,
-                        id : eventId
-                    }
+                    isHide = false;
+                    var meetings = response.getReturnValue().meetings;
+                    var params = response.getReturnValue().params;
                     
-                    $("#calendar").fullCalendar('renderEvent', newMeeting, true);
-                    
-                    /**
-                     * clear guest
-                     */
-                    component.set('v.guests', []);
-                    
-                    /**
-                     * clear input field
-                     */
-                    component.find('subject').set('v.value', '');
-                    component.find('description').set('v.value', '');
-                    
-                    /**
-                     * close dialog
-                     */
-                    $("#create-meeting-modal").css('display', 'none');
+                    var actionG = component.get('c.actionGallagher');
+                    actionG.setParams({
+                        'params' : params
+                    });
+                    actionG.setCallback(this, function(response2){
+                        console.log('callback 2');
+                        console.log(response2);
+                        if(response2.getReturnValue()){
+                            /**
+                             * render event to calendar
+                             */
+                                        
+                            var newMeeting = {
+                                title : component.find('subject').get('v.value'),
+                                start : startMeeting,
+                                end : endMeeting,
+                                id : eventId
+                            }
+                            
+                            $("#calendar").fullCalendar('renderEvent', newMeeting, true);
+                            
+                            /**
+                             * clear guest
+                             */
+                            component.set('v.guests', []);
+                            
+                            /**
+                             * clear input field
+                             */
+                            component.find('subject').set('v.value', '');
+                            component.find('description').set('v.value', '');
+                            
+                            /**
+                             * close dialog
+                             */
+                            $("#create-meeting-modal").css('display', 'none');
+                        }
+                        helper.showSpinner(component, false);   
+                    });
+                    $A.enqueueAction(actionG);
                 }else{
                     alert('Meeting not created');
                 }
             }
             
-            /**
-             * hide spinner
-             */
-            helper.showSpinner(component, false);
+            if(isHide){
+             	/**
+                 * hide spinner
+                 */
+                helper.showSpinner(component, false);   
+            }
         });
         
         $A.enqueueAction(action);
@@ -277,5 +298,11 @@
         component.set('v.guests', guests);
         
         $('#attendees_search').val('');
+    },
+    
+    handleSynchronizeInit : function(component, event, helper){
+        var eventS = component.getEvent('synchronizeBack');
+        eventS.setParams({'data' : event.getParam('data')});
+        eventS.fire();
     }
 })

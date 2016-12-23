@@ -61,8 +61,18 @@
             	/**
             	 * save event id from calendar api to related meetings
             	 */
+                var start_event = eventCreated.start.dateTime;
+                var end_event = eventCreated.end.dateTime;
+                                
+                if (!start_event) {
+                    start_event = eventCreated.start.date;
+                }
+                                
+                if (!end_event) {
+                    end_event = eventCreated.end.date;
+                }
                 
-                helper.saveToServer(eventCreated.id, eventCreated.updated);
+                helper.saveToServer(eventCreated.id, eventCreated.updated, start_event, end_event);
                 
             }else{
                 alert('Meeting not created');
@@ -164,40 +174,31 @@
         component.set('v.showSpinner', event.getParam('isShow'));
     },
     
-    test_function : function(component){
-        //document.getElementById('iframe').contentWindow.test_function();
-        var action = component.get('c.startRequest');
-        action.setParams({'tmp':false});
-        action.setCallback(this, function(response){
-            console.log(response.getReturnValue());
+    handleSynchronizeBack : function(component, event, handler){
+        console.log('fire catch');
+        var data = event.getParam('data');
+        console.log(data);
+        
+      	var action = component.get('c.synchronizeWithCalendar');
+        action.setParams({
+            'sdata' : data
         });
-        $A.enqueueAction(action);
-        
-        /*$.ajax({
-            url: 'https://www.hostinger.co.id/',
-            type: 'get',
-            contentType: 'application/json',
-            success: function(response){
-                console.log('success = ' + response);
-            },
-            error: function(error){
-                console.log('error = ' + error)
-            }
-        });*/
-        
-        /*var xHttp;
-        if(window.XMLHttpRequest){
-            xHttp = new XMLHttpRequest();
-        }else{
-            xHttp = new ActiveXObject('Microsoft.XMLHTTP');
-        }
-        xHttp.onreadystatechange = function(){
-            if(this.readyState == 4 && this.status == 200){
-                console.log(xmlhttp.responseText);
-            }
-        };
-        xHttp.open('get', 'http://xl-wms.hol.es/test.php', true);
-        xHttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-        xHttp.send();*/
+        action.setCallback(this, function(response){
+            var params = response.getReturnValue();
+            
+            var actionG = component.get('c.saveToGallagher');
+            actionG.setParams({
+                'params' : params
+            });
+            actionG.setCallback(this, function(response2){
+                console.log('response = ' + response2.getReturnValue());
+            });
+            $A.enqueueAction(actionG);
+        });
+        $A.enqueueAction(action);  
+    },
+    
+    test_function : function(component){
+       
     }
 })
