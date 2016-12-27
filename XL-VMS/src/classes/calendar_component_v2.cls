@@ -340,9 +340,22 @@ global with sharing class calendar_component_v2 {
     @AuraEnabled
     public static Boolean saveToGallagher(List<String> params){
         for(String param : params){
-            new_meeting.sendToGallagher(param);
+            new_meeting.sendToGallagher(param, '');
         }   
         
         return true;
+    }
+    
+    @AuraEnabled
+    public static List<String> updateToGallagher(List<String> params, List<String> maximoIds){
+        List<String> response = new List<String>();
+        Integer i = 0;
+        
+        for(String param : params){
+            response.add(new_meeting.sendToGallagher(param, maximoIds.get(i)));
+            i++;
+        }
+        
+        return response;
     }
 }

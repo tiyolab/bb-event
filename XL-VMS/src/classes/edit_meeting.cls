@@ -203,10 +203,23 @@ public with sharing class edit_meeting {
     @AuraEnabled
     public static Boolean sendToGallagher(List<String> params){
         for(String param : params){
-            new_meeting.sendToGallagher(param);
+            new_meeting.sendToGallagher(param, '');
         }   
         
         return true;
+    }
+    
+    @AuraEnabled
+    public static List<String> updateToGallagher(List<String> params, List<String> maximoIds){
+        List<String> response = new List<String>();
+        Integer i = 0;
+        
+        for(String param : params){
+            response.add(new_meeting.sendToGallagher(param, maximoIds.get(i)));
+            i++;
+        }
+        
+        return response;
     }
     
     @AuraEnabled

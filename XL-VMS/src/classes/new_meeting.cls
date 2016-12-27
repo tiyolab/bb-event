@@ -108,7 +108,7 @@ global with sharing class new_meeting {
 		/**
          * send email invitation to guests
          */
-        for(Meeting__c g : meetings){
+        /*for(Meeting__c g : meetings){
                 Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();    
                 mail.setTargetObjectId(g.Guest__c);
                 mail.setTemplateId('00X28000001G2ZQ');
@@ -116,7 +116,7 @@ global with sharing class new_meeting {
                 mail.setWhatId(g.Id);
                 mail.setSaveAsActivity(false);
                 Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});
-        }
+        }*/
         
         /**
          * get access item data
@@ -147,10 +147,6 @@ global with sharing class new_meeting {
                                          Room__r.Name
                                          from Meeting__c where Id in :meetings
                                         ];
-		/*for(Meeting__c m : meetingDatas){
-         	m.Start_Meeting__c = m.Start_Meeting__c.format('YYYY-MM-dd\'T\'HH:mm:ss');
-            m.End_Meeting__c = m.End_Meeting__c.format('YYYY-MM-dd\'T\'HH:mm:ss');
-        }*/
         
         List<String> generatedParam = generateUrlParam(meetingDatas, relatedAccessList);
                            
@@ -163,11 +159,48 @@ global with sharing class new_meeting {
     }
     
     @AuraEnabled
-    public static Boolean actionGallagher(List<String> params){
-        for(String param : params){
-            sendToGallagher(param);
-        }   
+    public static Map<String, Object> actionGallagher(List<String> params){
+        Map<String, Object> sfmxMap = new Map<String, Object>();
         
+        for(String param : params){
+            String response = sendToGallagher(param, '');
+            if( response != ''){
+                Map<String, Object> jsonData = (Map<String, Object>)JSON.deserializeUntyped(response);
+                Map<String, Object> CreateVMSMEETINGResponse = (Map<String, Object>)jsonData.get('CreateVMSMEETINGResponse');
+                Map<String, Object> VMSMEETINGSet = (Map<String, Object>)CreateVMSMEETINGResponse.get('VMSMEETINGSet');
+                Map<String, Object> TALMEETING = (Map<String, Object>)VMSMEETINGSet.get('TALMEETING');
+                Map<String, Object> Attributes = (Map<String, Object>)TALMEETING.get('Attributes');
+                Map<String, Object> SFMEETINGID = (Map<String, Object>)Attributes.get('SFMEETINGID');
+                Map<String, Object> MEETINGID = (Map<String, Object>)Attributes.get('MEETINGID');
+                
+                sfmxMap.put((String)SFMEETINGID.get('content'), MEETINGID.get('content'));
+            }
+        }
+        
+        return sfmxMap;
+    }
+    
+    @AuraEnabled
+    public static List<String> updateToGallagher(List<String> params, List<String> maximoIds){
+        List<String> response = new List<String>();
+        Integer i = 0;
+        
+        for(String param : params){
+            response.add(sendToGallagher(param, maximoIds.get(i)));
+            i++;
+        }
+        
+        return response;
+    }
+    
+    @AuraEnabled
+    public static Boolean setMxMeetingId(Map<String, Object> sfmxMeetingIds){
+        List<Meeting__c> meetings = [select Id, Mx_Meeting_Id__c from Meeting__c where Id in :sfmxMeetingIds.keySet()];
+        for(Meeting__c m : meetings){
+            m.Mx_Meeting_Id__c = Integer.valueOf(sfmxMeetingIds.get(m.Id));
+        }
+        
+        update meetings;
         return true;
     }
     
@@ -178,20 +211,23 @@ global with sharing class new_meeting {
     }
     
     //@future(callout=true)
-    public static void sendToGallagher(String param){
+    public static String sendToGallagher(String param, String maximoId){
         System.debug('calling request');
         Http http = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndpoint('http://182.253.1.69:9080/maximo/rest/os/VMSMEETING/?_format=json&_lid=wilson&_lpwd=wilson&action=addChange&' + param);
+        request.setEndpoint('http://182.253.1.69:9080/maximo/rest/os/VMSMEETING/'+ maximoId +'?_format=json&_lid=wilson&_lpwd=wilson&action=addChange&' + param);
         //request.setEndpoint('http://xl-wms.hol.es/get.php?test=test');
         request.setMethod('POST');
         request.setHeader('Content-Type', 'application/json;charset=UTF-8');
         request.setTimeout(30000);
+        
         HttpResponse response = http.send(request);
         System.debug(response.getBody());
         if(response.getStatusCode() == 200){
-            System.debug('rest success');
+            return response.getBody();
         }
+        
+        return '';
     }
     
     public static List<String> generateUrlParam(Meeting__c[] meetings, Related_Access__c[] relatedAccess){

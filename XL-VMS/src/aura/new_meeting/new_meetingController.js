@@ -89,6 +89,7 @@
              * hide spinner
              */
             isRoomLoaded = true;
+            console.log('1 = ' + isTimeZoneLoaded + ' - ' + isRoomLoaded);
             if(isRoomLoaded && isTimeZoneLoaded){
             	helper.showSpinner(component, false);    
             }
@@ -99,8 +100,7 @@
         /**
          * Get User Timezone
          */
-        if(component.get('v.timeZone') == ''){
-            var action2 = component.get('c.getTimeZone');
+        var action2 = component.get('c.getTimeZone');
             action2.setCallback(this, function(response){
                 if(component.isValid() && response.getState() == 'SUCCESS'){
                     if(response.getReturnValue() != null && response.getReturnValue() != ''){
@@ -116,12 +116,12 @@
                  * hide spinner
                  */
                 isTimeZoneLoaded = true;
+                console.log('2 = ' + isTimeZoneLoaded + ' - ' + isRoomLoaded);
                 if(isRoomLoaded && isTimeZoneLoaded){
                     helper.showSpinner(component, false);    
                 }
             });
             $A.enqueueAction(action2);
-        }
         
         $("#create-meeting-modal").css('display', 'block');
     },
@@ -198,52 +198,77 @@
         
         action.setCallback(this, function(response){
             var isHide = true;
-            console.log('callback 1');
-            console.log(response);
             if(component.isValid() && response.getState() == 'SUCCESS'){
                 if(response.getReturnValue() != null){
                     isHide = false;
                     var meetings = response.getReturnValue().meetings;
                     var params = response.getReturnValue().params;
                     
+                    /**
+                     * send to server to send to maximo rest service
+                     */
                     var actionG = component.get('c.actionGallagher');
                     actionG.setParams({
                         'params' : params
                     });
                     actionG.setCallback(this, function(response2){
-                        console.log('callback 2');
-                        console.log(response2);
-                        if(response2.getReturnValue()){
-                            /**
-                             * render event to calendar
-                             */
-                                        
-                            var newMeeting = {
-                                title : component.find('subject').get('v.value'),
-                                start : startMeeting,
-                                end : endMeeting,
-                                id : eventId
-                            }
+                        var isHide2 = true;
+                        
+                        if(response2.getReturnValue() != null){
+                            isHide2 = false;
+                            var maximo = response2.getReturnValue();
                             
-                            $("#calendar").fullCalendar('renderEvent', newMeeting, true);
+                            var actionUG = component.get('c.setMxMeetingId');
+                            actionUG.setParams({
+                                'sfmxMeetingIds' : maximo
+                            });
+                            actionUG.setCallback(this, function(responseUG){
+                                if(responseUG){
+                            		/**
+                                     * render event to calendar
+                                     */
+                                                
+                                    var newMeeting = {
+                                        title : component.find('subject').get('v.value'),
+                                        start : startMeeting,
+                                        end : endMeeting,
+                                        id : eventId
+                                    }
+                                    
+                                    $("#calendar").fullCalendar('renderEvent', newMeeting, true);
+                                    
+                                    /**
+                                     * clear guest
+                                     */
+                                    component.set('v.guests', []);
+                                    
+                                    /**
+                                     * clear input field
+                                     */
+                                    component.find('subject').set('v.value', '');
+                                    component.find('description').set('v.value', '');
+                                    
+                                    /**
+                                     * close dialog
+                                     */
+                                    $("#create-meeting-modal").css('display', 'none');        
+                                }
+                                /**
+                                 * hide spinner
+                                 */
+                                helper.showSpinner(component, false);   
+                                
+                            });
+                            $A.enqueueAction(actionUG);
                             
-                            /**
-                             * clear guest
-                             */
-                            component.set('v.guests', []);
-                            
-                            /**
-                             * clear input field
-                             */
-                            component.find('subject').set('v.value', '');
-                            component.find('description').set('v.value', '');
-                            
-                            /**
-                             * close dialog
-                             */
-                            $("#create-meeting-modal").css('display', 'none');
                         }
-                        helper.showSpinner(component, false);   
+                        
+                        if(isHide2){
+                         	/**
+                             * hide spinner
+                             */
+                            helper.showSpinner(component, false);      
+                        }
                     });
                     $A.enqueueAction(actionG);
                 }else{
