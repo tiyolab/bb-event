@@ -216,6 +216,7 @@ global with sharing class new_meeting {
         Http http = new Http();
         HttpRequest request = new HttpRequest();
         request.setEndpoint('http://182.253.1.69:9080/maximo/rest/os/VMSMEETING/'+ maximoId +'?_format=json&_lid=wilson&_lpwd=wilson&action=addChange&' + param);
+        System.debug('url = ' + 'http://182.253.1.69:9080/maximo/rest/os/VMSMEETING/'+ maximoId +'?_format=json&_lid=wilson&_lpwd=wilson&action=addChange&' + param);
         //request.setEndpoint('http://xl-wms.hol.es/get.php?test=test');
         request.setMethod('POST');
         request.setHeader('Content-Type', 'application/json;charset=UTF-8');

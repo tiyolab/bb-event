@@ -200,14 +200,26 @@
                     var timezone = response.getReturnValue().timezone;
                     var params = response.getReturnValue().params;
                     
-                    var actionG = component.get('c.sendToGallagher');
+                    /**
+                     * generate maximo ids
+                     */
+                    var maximoIds = [];
+                    meetings.forEach(function(meeting){
+                        maximoIds.push(meeting.Mx_Meeting_Id__c+"");
+                    });
+                    
+                    console.log('mx id ');
+                    console.log(maximoIds);
+                    
+                    var actionG = component.get('c.updateToGallagher');
                     actionG.setParams({
-                        'params' : params
+                        'params' : params,
+                        'maximoIds' : maximoIds
                     });
                     actionG.setCallback(this, function(response2){
-                        console.log('response = ' + response2.getReturnValue());
-                        
-                        if(response2.getReturnValue()){
+                        if(response2.getReturnValue() != null && response2.getReturnValue() != ''){
+                            var sfmxMapId = response2.getReturnValue();
+                            
                             var guest = component.get('v.guests');
                             var guestEmail = [];
                             guest.forEach(function(value){
@@ -215,18 +227,15 @@
                                     'email' : value.Email
                                 });
                             });
-                            
+                                    
                             var event = component.getEvent('response_edit_meeting');
                             event.setParams({
                                 'meetings' : meetings,
                                 'timezone' : timezone,
-                                'guests_email' : JSON.stringify(guestEmail)
+                                'guests_email' : JSON.stringify(guestEmail),
+                                'sfMxIds' : JSON.stringify(sfmxMapId)
                             });
                             event.fire();
-                            
-                            $("#edit-meeting-modal").css('display', 'none');
-                            
-                            alert('update success');
                         }
                         
                         /**
@@ -249,5 +258,26 @@
         });
         $A.enqueueAction(action);
         console.log(action);
+    },
+    
+    handleUpdateMaxIdnUpdatedTime : function(component, event, helper){
+        var sfMxIds = event.getParam('sfMxIds');
+        var lastUpdatedAt = event.getParam('lastUpdatedAt');
+        
+        var action = component.get('c.updateMxMeetingIdnUpdatedTime');
+        action.setParams({
+            'sfmxMeetingIds' : JSON.parse(sfMxIds),
+            'lastUpdatedTime' : lastUpdatedAt
+        });
+        action.setCallback(this, function(response){
+            if(response.getReturnValue()){
+                /**
+                 * * hide spinner
+                 */
+                helper.showSpinner(component, false);   
+                console.log('really finish');
+            }
+        });
+        $A.enqueueAction(action);
     }
 })

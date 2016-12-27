@@ -2,4 +2,5 @@
     <aura:attribute name="meetings" type="Meeting__c[]"/>
     <aura:attribute name="timezone" type="String" />
     <aura:attribute name="guests_email" type="String" />
+    <aura:attribute name="sfMxIds" type="String" />
 </aura:event>

@@ -3,6 +3,7 @@
     <ltng:require scripts="{!$Resource.calendar_v2}"/>
     
     <aura:handler event="c:event_open_edit_meeting" action="{!c.openModal}"/>
+    <aura:handler event="c:eventUpdateMaxIdnUpdatedTime" action="{!c.handleUpdateMaxIdnUpdatedTime}"/>
     
     <aura:attribute name="event_id" type="String" default=""/>
     <aura:attribute name="old_meeting" type="Meeting__c[]" default="[]"/>

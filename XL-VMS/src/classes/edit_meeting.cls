@@ -165,6 +165,8 @@ public with sharing class edit_meeting {
          */
         List<Meeting__c> meetingDatas = [select 
                                          Id, 
+                                         Event_Id__c,
+                                         Mx_Meeting_Id__c,
                                          Start_Meeting__c, 
                                          End_Meeting__c, 
                                          Subject__c, 
@@ -194,32 +196,69 @@ public with sharing class edit_meeting {
         
         Map<String, object> toReturn = new Map<String, object>();
         toReturn.put('timezone', u.TimeZoneSidKey);
-        toReturn.put('meetings', newMeeting);
+        toReturn.put('meetings', meetingDatas);
 		toReturn.put('params', generatedParam);
                                           
 		return toReturn;
     }
     
     @AuraEnabled
-    public static Boolean sendToGallagher(List<String> params){
-        for(String param : params){
-            new_meeting.sendToGallagher(param, '');
-        }   
-        
-        return true;
-    }
-    
-    @AuraEnabled
-    public static List<String> updateToGallagher(List<String> params, List<String> maximoIds){
-        List<String> response = new List<String>();
+    public static Map<String, Object> updateToGallagher(List<String> params, List<String> maximoIds){
+        Map<String, Object> sfmxMap = new Map<String, Object>();
         Integer i = 0;
         
         for(String param : params){
-            response.add(new_meeting.sendToGallagher(param, maximoIds.get(i)));
+            String mxId = '';
+            if(maximoIds.get(i) != 'undefined'){
+                mxId = maximoIds.get(i);
+            }
+            
+            String response = new_meeting.sendToGallagher(param, mxId + '');
+            
+            System.debug('response = ');
+            System.debug(response);
+            
+            if( response != ''){
+                Map<String, Object> jsonData = (Map<String, Object>)JSON.deserializeUntyped(response);
+                if((Map<String, Object>)jsonData.get('CreateVMSMEETINGResponse') != null){
+                	Map<String, Object> CreateVMSMEETINGResponse = (Map<String, Object>)jsonData.get('CreateVMSMEETINGResponse');
+                    Map<String, Object> VMSMEETINGSet = (Map<String, Object>)CreateVMSMEETINGResponse.get('VMSMEETINGSet');
+                    Map<String, Object> TALMEETING = (Map<String, Object>)VMSMEETINGSet.get('TALMEETING');
+                    Map<String, Object> Attributes = (Map<String, Object>)TALMEETING.get('Attributes');
+                    Map<String, Object> SFMEETINGID = (Map<String, Object>)Attributes.get('SFMEETINGID');
+                    Map<String, Object> MEETINGID = (Map<String, Object>)Attributes.get('MEETINGID');
+                    
+                    sfmxMap.put((String)SFMEETINGID.get('content'), MEETINGID.get('content'));    
+                }else if((Map<String, Object>)jsonData.get('SyncVMSMEETINGResponse') != null){
+                    Map<String, Object> SyncVMSMEETINGResponse = (Map<String, Object>)jsonData.get('SyncVMSMEETINGResponse');
+                    Map<String, Object> VMSMEETINGSet = (Map<String, Object>)SyncVMSMEETINGResponse.get('VMSMEETINGSet');
+                    Map<String, Object> TALMEETING = (Map<String, Object>)VMSMEETINGSet.get('TALMEETING');
+                    Map<String, Object> Attributes = (Map<String, Object>)TALMEETING.get('Attributes');
+                    Map<String, Object> SFMEETINGID = (Map<String, Object>)Attributes.get('SFMEETINGID');
+                    Map<String, Object> MEETINGID = (Map<String, Object>)Attributes.get('MEETINGID');
+                    
+                    sfmxMap.put((String)SFMEETINGID.get('content'), MEETINGID.get('content'));
+                }
+                
+            }
+            
             i++;
         }
         
-        return response;
+        System.debug('edit_meeting returned from service = ' + sfmxMap);
+        return sfmxMap;
+    }
+    
+    @AuraEnabled
+    public static Boolean updateMxMeetingIdnUpdatedTime(Map<String, Object> sfmxMeetingIds, String lastUpdatedTime){
+        List<Meeting__c> meetings = [select Id, Mx_Meeting_Id__c, Last_Updated_At__c from Meeting__c where Id in :sfmxMeetingIds.keySet()];
+        for(Meeting__c m : meetings){
+            m.Mx_Meeting_Id__c = Integer.valueOf(sfmxMeetingIds.get(m.Id));
+            m.Last_Updated_At__c = lastUpdatedTime;
+        }
+        
+        update meetings;
+        return true;
     }
     
     @AuraEnabled

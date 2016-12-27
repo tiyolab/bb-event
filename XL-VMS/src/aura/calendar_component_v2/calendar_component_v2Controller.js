@@ -93,7 +93,7 @@
         var meetings = event.getParam('meetings');
         var attendees = JSON.parse(event.getParam('guests_email'));
         var timezone = event.getParam('timezone');
-        var full_calendar_event = event.getParam('full_calendar_event');
+        var sfMxIds = event.getParam('sfMxIds');
         
         var meetingMetadata = {
             'eventId' : meetings[0].Event_Id__c,
@@ -134,6 +134,13 @@
                 
                 $("#calendar").fullCalendar('removeEvents', eventCreated.id);
                 $("#calendar").fullCalendar('renderEvent', newMeeting, true);
+                
+                var eventU = $A.get('e.c:eventUpdateMaxIdnUpdatedTime');
+                eventU.setParams({
+                    'sfMxIds' : sfMxIds,
+                    'lastUpdatedAt' : eventCreated.updated
+                });
+                eventU.fire();
                 
                 console.log('update finished');
             }

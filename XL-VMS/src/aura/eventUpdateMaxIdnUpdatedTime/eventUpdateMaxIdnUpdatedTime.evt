@@ -1,0 +1,4 @@
+<aura:event type="APPLICATION" description="event to send last updated time from calendar and maximo id from server after updated meeting" access="global">
+    <aura:attribute name="sfMxIds" type="String"/>
+    <aura:attribute name="lastUpdatedAt" type="String"/>
+</aura:event>
