@@ -17,9 +17,34 @@ public with sharing class detail_meeting {
     }
     
     @AuraEnabled
-    public static Boolean deleteMeeting(String eventId){
-        Meeting__c[] m = [select Id from Meeting__c where Event_Id__c = :eventId];
-        delete m;
+    public static List<Object> deleteMeeting(String eventId){
+        /**
+         * Map<maximo_id, param> toReturn
+         */
+        List<Object> toReturn = new List<Object>();
+        List<Meeting__c> meetingDatas = [select 
+                                         Id,
+                                         Mx_Meeting_Id__c
+                                         from Meeting__c where Event_Id__c = :eventId
+                                        ];
+        
+        for(Meeting__c mt : meetingDatas){
+            toReturn.add(mt.Mx_Meeting_Id__c);
+        }
+        
+        delete meetingDatas;
+        
+        return toReturn;
+    }
+    
+    @AuraEnabled
+    /**
+     * Map<maximo_id, param> toReturn
+     */
+    public static Boolean sendGallagher(List<Object> listMaxId){
+        for(Object maxId : listMaxId){
+            new_meeting.sendToGallagher('description=canceled', String.valueOf(maxId));
+        }
         
         return true;
     }

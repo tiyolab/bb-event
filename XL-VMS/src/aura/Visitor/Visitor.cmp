@@ -29,8 +29,11 @@
                 <div class="slds-form--stacked">
                     <div class="slds-form-element slds-is-required">
                         <div class="slds-form-elemet__control">
-                            <ui:inputText aura:id="contactName" label="Name" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.Name}" required="true" placeholder="Visitor Name" />
-                        </div>
+                            
+                            <ui:inputText aura:id="contactName" label="Name" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.Name}" required="true" placeholder="Visitor Name" >
+                            	<c:cmp_svg svgPath="/resource/slds214/assets/icons/standard-sprite/svg/symbols.svg#user" category="standard" size="large" name="user" />
+                            </ui:inputText>
+                        </div>                        
                     </div>
                     
                     <div class="slds-form-element slds-lookup"> 

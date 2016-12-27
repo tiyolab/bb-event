@@ -27,5 +27,18 @@
             'isShow' : isShow
         });
         event.fire();
-    }
+    },
+    
+    closeModal : function(component){
+    	$("#edit-meeting-modal").css('display', 'none');
+        /**
+         * clear variable
+         */
+        component.set('v.event_id', '');
+        component.find('subject').set('v.value', '');
+        component.find('description').set('v.value', '');
+        component.set('v.guests', []);
+        component.set('v.old_meeting', []);
+        component.set('v.selected_room', '');
+	}
 })

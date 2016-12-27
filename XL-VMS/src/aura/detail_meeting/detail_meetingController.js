@@ -61,13 +61,42 @@
             'eventId' : component.get('v.eventId')
         });
         action.setCallback(this, function(response){
+            var isHide = true;
+            
             if(component.isValid() && response.getState() == 'SUCCESS'){
-                if(response.getReturnValue()){
-           			var eventDelete = component.getEvent('delete_meeting');
-                    eventDelete.setParams({
-                        'eventId' : component.get('v.eventId')
+                if(response.getReturnValue() != null){
+                    var isHide = false;
+                    
+                    var listMaxId = response.getReturnValue();
+                    
+                    /**
+                     * action send to gallagher
+                     */
+                    var actionG = component.get('c.sendGallagher');
+                    actionG.setParams({
+                        'listMaxId' : listMaxId
                     });
-                    eventDelete.fire();
+                    actionG.setCallback(this, function(responseG){
+                        isHide = true;
+                        
+                        if(responseG.getReturnValue()){
+                        	isHide = false;
+                            
+                            var eventDelete = component.getEvent('delete_meeting');
+                            eventDelete.setParams({
+                                'eventId' : component.get('v.eventId')
+                            });
+                            eventDelete.fire();
+                        }
+                        
+                        if(isHide){
+                            /**
+                             * hide spinner
+                             */
+                            helper.showSpinner(component, false);   
+                        }
+                    });
+                    $A.enqueueAction(actionG);
                     
                     helper.closeModal(component);
                 }else{
@@ -75,10 +104,12 @@
                 }
             }
             
-            /**
-             * hide spinner
-             */
-            helper.showSpinner(component, false);
+            if(isHide){
+             	/**
+                 * hide spinner
+                 */
+                helper.showSpinner(component, false);   
+            }
         });
         $A.enqueueAction(action);
 	}

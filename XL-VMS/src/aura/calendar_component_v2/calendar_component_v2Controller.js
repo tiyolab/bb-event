@@ -85,11 +85,6 @@
     },
     
     handle_response_edit_meeting : function(component, event, helper){
-        /**
-         * show spinner
-         */
-        component.set('v.showSpinner', true);
-        
         var meetings = event.getParam('meetings');
         var attendees = JSON.parse(event.getParam('guests_email'));
         var timezone = event.getParam('timezone');
@@ -142,27 +137,17 @@
                 });
                 eventU.fire();
                 
-                console.log('update finished');
             }
-            
-            /**
-             * hide spinner
-             */
-            component.set('v.showSpinner', false);
         });
+        
+        console.log('in end event');
     },
     
     handle_delete_meeting : function(component, event, helper){
-        /**
-         * show spinner
-         */
-        component.set('v.showSpinner', true);
-        
         var eventId = event.getParam('eventId');
-        console.log(eventId);
         document.getElementById('iframe').contentWindow.deleteEvent(eventId, function(status){
             if(status){
-                console.log('delete success');
+                alert('delete success');
                 $("#calendar").fullCalendar('removeEvents', eventId);
             }
             

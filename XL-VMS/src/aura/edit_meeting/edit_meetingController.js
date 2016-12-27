@@ -84,16 +84,7 @@
     },
     
     closeModal : function(component, event, helper){
-        $("#edit-meeting-modal").css('display', 'none');
-        /**
-         * clear variable
-         */
-        component.set('v.event_id', '');
-        component.find('subject').set('v.value', '');
-        component.find('description').set('v.value', '');
-        component.set('v.guests', []);
-        component.set('v.old_meeting', []);
-        component.set('v.selected_room', '');
+        helper.closeModal(component);
     },
     
     openModal : function(component, event, helper){
@@ -217,7 +208,11 @@
                         'maximoIds' : maximoIds
                     });
                     actionG.setCallback(this, function(response2){
+                        isHide = true;
+                        
                         if(response2.getReturnValue() != null && response2.getReturnValue() != ''){
+                            isHide = false;
+                            
                             var sfmxMapId = response2.getReturnValue();
                             
                             var guest = component.get('v.guests');
@@ -227,7 +222,7 @@
                                     'email' : value.Email
                                 });
                             });
-                                    
+                                  
                             var event = component.getEvent('response_edit_meeting');
                             event.setParams({
                                 'meetings' : meetings,
@@ -236,13 +231,16 @@
                                 'sfMxIds' : JSON.stringify(sfmxMapId)
                             });
                             event.fire();
+                            
+                            helper.closeModal(component);
                         }
                         
-                        /**
-                         * hide spinner
-                         */
-                        helper.showSpinner(component, false);   
-                        
+                        if(isHide){
+                         	/**
+                             * hide spinner
+                             */
+                            helper.showSpinner(component, false);   
+                        }
                     });
                     $A.enqueueAction(actionG);
                 }
@@ -257,7 +255,6 @@
             
         });
         $A.enqueueAction(action);
-        console.log(action);
     },
     
     handleUpdateMaxIdnUpdatedTime : function(component, event, helper){
@@ -271,11 +268,11 @@
         });
         action.setCallback(this, function(response){
             if(response.getReturnValue()){
+                alert('update success');
                 /**
                  * * hide spinner
                  */
-                helper.showSpinner(component, false);   
-                console.log('really finish');
+                helper.showSpinner(component, false);
             }
         });
         $A.enqueueAction(action);

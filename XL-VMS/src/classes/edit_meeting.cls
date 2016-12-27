@@ -18,6 +18,7 @@ public with sharing class edit_meeting {
     public static List<Meeting__c> getMeeting(String eventId){
         return [select Id,
                Event_Id__c,
+               Mx_Meeting_Id__c,
                Subject__c,
                Description__c,
                Host__c,
@@ -45,6 +46,7 @@ public with sharing class edit_meeting {
         List<Contact> newContact = new List<Contact>();
         List<Contact> savedContact = new List<Contact>();
         List<Meeting__c> deleteMeeting = new List<Meeting__c>();
+		List<Meeting__c> deleteMeetingToWebservice = new List<Meeting__c>();
         List<Meeting__c> newMeeting = new List<Meeting__c>();
 		//Map<Id, Id> newGuestIds = new Map<Id, Id>();
         
@@ -122,6 +124,7 @@ public with sharing class edit_meeting {
             
             if(isDeleted){
                 deleteMeeting.add(m);
+                deleteMeetingToWebservice.add(m);
             }else{
                 m.Subject__c = subject;
                 m.Description__c = description;
@@ -186,9 +189,17 @@ public with sharing class edit_meeting {
                                          Room__r.Name
                                          from Meeting__c where Id in :newMeeting
                                         ];
-                                          
+		                                        
 		List<String> generatedParam = new_meeting.generateUrlParam(meetingDatas, relatedAccessList);
         
+		/**
+		 * add deleted meeting to send to web service
+		 */
+		for(Meeting__c m : deleteMeetingToWebservice){
+            meetingDatas.add(m);
+            generatedParam.add('description=canceled');
+        }
+                                          
         /**
          * get host timezone
          */
