@@ -28,17 +28,20 @@
             <div class="slds-panel__section">
                 <div class="slds-form--stacked">
                     <div class="slds-form-element slds-is-required">
-                        <div class="slds-form-elemet__control">
-                            
-                            <ui:inputText aura:id="contactName" label="Name" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.Name}" required="true" placeholder="Visitor Name" >
-                            	<c:cmp_svg svgPath="/resource/slds214/assets/icons/standard-sprite/svg/symbols.svg#user" category="standard" size="large" name="user" />
-                            </ui:inputText>
-                        </div>                        
+                        <!-- <div class="slds-form-elemet__control slds-input-has-icon slds-input-has-icon-left">
+                            <c:cmp_svg svgPath="/resource/slds214/assets/icons/standard-sprite/svg/symbols.svg#user" category="standard" size="small" name="user" />
+                            <ui:inputText aura:id="contactName" label="Name" class="slds-input" labelClass="slds-form-element__label" value="{!v.newContact.Name}" required="true" placeholder="Visitor Name" />
+                        </div> -->
+                        <label class="slds-form-element__label" for="contactName">Name</label>
+                        <div class="slds-form-element__control slds-input-has-icon slds-input-has-icon--left">
+                        	<c:cmp_svg svgPath="/resource/slds214/assets/icons/standard-sprite/svg/symbols.svg#user" category="standard" size="x-small" name="user" />
+                        	<input id="contactName" class="slds-input" type="text" placeholder="Visitor Name" value="{!v.newContact.Name}"></input>
+                        </div>
                     </div>
                     
                     <div class="slds-form-element slds-lookup"> 
                         <label class="slds-form-element__label" for="host">Host</label>
-                        <div class="slds-form-element__control">                            
+                        <div class="slds-form-element__control">                               
                             <input id="host" class="slds-input slds-lookup__search-input" type="search" 
                              aria-owns="global-search-list-01" role="combobox" aria-activedescendent="" aria-expanded="true" 
                              aria-autocomplete="list" value="{!v.searchString}" placeholder="Host" required="true" onkeyup="{!c.searchHost}" />
@@ -59,6 +62,7 @@
                             
                             <div id="toMeet" class="slds-pill_container slds-hide">
                             	<span class="slds-pill slds-size--9-of-10 slds-float--left">
+                                    <c:cmp_svg svgPath="/resource/slds214/assets/icons/standard-sprite/svg/symbols.svg#contact" category="standard" size="small" name="contact" />
                                 	<span class="slds-pill__label" title="Salesforce.com, Inc.">
                                         <p>{!v.toMeetName}</p>
                                     </span>

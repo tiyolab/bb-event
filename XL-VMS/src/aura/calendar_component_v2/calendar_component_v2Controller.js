@@ -159,7 +159,7 @@
     },
     
     calendar_data_loaded : function(component, event, helper){
-        component.set('v.showSpinner', false);
+        //component.set('v.showSpinner', false);
     },
     
     handle_toggle_spinner : function(component, event, handler){
@@ -167,25 +167,57 @@
     },
     
     handleSynchronizeBack : function(component, event, handler){
-        console.log('fire catch');
+        
         var data = event.getParam('data');
-        console.log(data);
         
       	var action = component.get('c.synchronizeWithCalendar');
         action.setParams({
             'sdata' : data
         });
         action.setCallback(this, function(response){
-            var params = response.getReturnValue();
+            var isHide = true;
             
-            var actionG = component.get('c.saveToGallagher');
-            actionG.setParams({
-                'params' : params
-            });
-            actionG.setCallback(this, function(response2){
-                console.log('response = ' + response2.getReturnValue());
-            });
-            $A.enqueueAction(actionG);
+            if(response.getReturnValue() != null){
+                isHide = false;
+             	
+                var params = response.getReturnValue().params;
+                var maximoId =  response.getReturnValue().maximoId;
+                
+                var actionG = component.get('c.updateToGallagher');
+                actionG.setParams({
+                    'params' : params,
+                    'maximoId' : maximoId
+                });
+                actionG.setCallback(this, function(response2){
+                    isHide = true;
+                    
+                    if(response2.getReturnValue() != null){
+                        isHide = false;
+                        
+                        var actionUMaxId = component.get('c.updateMxMeetingId');
+                        actionUMaxId.setParams({
+                            'sfmxMeetingIds' : response2.getReturnValue()
+                        });
+                        actionUMaxId.setCallback(this, function(response3){
+                            if(response3.getReturnValue()){
+                                alert('Synchronize finish');
+                            }
+                            
+                            component.set('v.showSpinner', false);
+                        });
+                        $A.enqueueAction(actionUMaxId);    
+                    }
+                    
+                    if(isHide){
+                        component.set('v.showSpinner', false);
+                    }
+                });
+                $A.enqueueAction(actionG);
+            }
+            
+            if(isHide){
+                component.set('v.showSpinner', false);
+            }
         });
         $A.enqueueAction(action);  
     },

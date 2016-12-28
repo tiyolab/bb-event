@@ -1,6 +1,6 @@
 global with sharing class calendar_component_v2 {
     @AuraEnabled  
-    public static List<String> synchronizeWithCalendar(String sdata){
+    public static Map<String, List<String>> synchronizeWithCalendar(String sdata){
         Map<String, Object> dataJSON = (Map<String, Object>)JSON.deserializeUntyped(sdata);
         
         /**
@@ -71,13 +71,28 @@ global with sharing class calendar_component_v2 {
         Contact[] host = [select Id from Contact where Email = :userEmail];
         
         for(Meeting__c m : [select 
-                            Last_updated_At__c, 
                             Id, 
-                            Event_Id__c, 
-                            Guest__r.Email, 
-                            Guest__c, 
+                            Event_Id__c,
+                            Mx_Meeting_Id__c,
+                            Last_updated_At__c,
+                            Start_Meeting__c, 
+                            End_Meeting__c, 
+                            Subject__c, 
+                            Description__c, 
                             Host__c, 
-                            Room__c 
+                            Host__r.LastName,
+                            Host__r.FirstName,
+                            Guest__c,
+                            Guest__r.Email,
+                            Guest__r.LastName,
+                            Guest__r.FirstName,
+                            Guest__r.ID_Number__c, 
+                            Guest__r.MailingStreet, 
+                            Guest__r.MailingCity, 
+                            Guest__r.MailingState, 
+                            Guest__r.MailingCountry, 
+                            Room__c,
+                            Room__r.Name
                             from Meeting__c where Host__c = :host[0].Id]){
                             //from Meeting__c where Event_Id__c in :data.keySet()]){
             /**
@@ -186,37 +201,95 @@ global with sharing class calendar_component_v2 {
                 if(dataEmailMeeting.get(eventId).get(m.Guest__r.Email) == null){
                     toDelete.add(m);
                 }else{
-                    toUpdate.add(new Meeting__c(
-                        Id = m.Id,
-                        Description__c = data.get(EventId)[0].Description__c,
-                        End_Meeting__c = data.get(EventId)[0].End_Meeting__c,
-                        Event_Id__c = data.get(EventId)[0].Event_Id__c,
-                        Guest__c = m.Guest__c,
-                        Host__c = m.Host__c,
-                        Last_Updated_At__c = data.get(EventId)[0].Last_Updated_At__c,
-                        Room__c = m.Room__c,
-                        Start_Meeting__c = data.get(EventId)[0].Start_Meeting__c,
-                        Status__c = data.get(EventId)[0].Status__c,
-                        Subject__c = data.get(EventId)[0].Subject__c
-                    ));
+                    Meeting__c toUpdateM = m;
+                    toUpdateM.Description__c = data.get(EventId)[0].Description__c;
+                    toUpdateM.End_Meeting__c = data.get(EventId)[0].End_Meeting__c;
+                    toUpdateM.Event_Id__c = data.get(EventId)[0].Event_Id__c;
+                    toUpdateM.Last_Updated_At__c = data.get(EventId)[0].Last_Updated_At__c;
+                    toUpdateM.Start_Meeting__c = data.get(EventId)[0].Start_Meeting__c;
+                    toUpdateM.Status__c = data.get(EventId)[0].Status__c;
+                    toUpdateM.Subject__c = data.get(EventId)[0].Subject__c;
+                    
+                    toUpdate.add(toUpdateM);
                 }
             }
         }
         
-        System.debug('to create');
-        System.debug(toCreate);
-        List<String> paramsSendToGallagher = createSynchronizedMeeting(toCreateEmail, toCreate);
+        List<String> paramsSendToGallagher = new List<String>();
+        List<String> maximoId = new List<String>();
         
+        List<String> paramsCreateSendToGallagher = createSynchronizedMeeting(toCreateEmail, toCreate);
+        for(String x : paramsCreateSendToGallagher){
+            maximoId.add('0');
+        }
+        System.debug('params create');
+        System.debug(paramsCreateSendToGallagher);
         
-        System.debug('to update');
-        System.debug(toUpdate);
+        System.debug('maximo create');
+        System.debug(maximoId);
+        
+        Set<String> listRoomIds = new Set<String>();
+        Map<String, List<Related_Access__c>> mapRoomIdRelAcc = new Map<String, List<Related_Access__c>>();
+        Map<String, List<Meeting__c>> mapRoomIdMeet = new Map<String, List<Meeting__c>>();
+        List<String> paramsUpdateSendToGallagher = new List<String>();
+        List<String> paramsDeleteSendToGallagher = new List<String>();
+        
+        for(Meeting__c m : toUpdate){
+            listRoomIds.add(m.Room__c);
+            
+            if(mapRoomIdMeet.get(m.Room__c) == null){
+               mapRoomIdMeet.put(m.Room__c, new List<Meeting__c>()); 
+            }
+            
+            mapRoomIdMeet.get(m.Room__c).add(m);
+        }
+        
+        for(Related_Access__c r : [select Id, Access_Item__c, Access_Item__r.Name, Room__c, Room__r.Name from Related_Access__c where Room__c in :listRoomIds]){
+            if(mapRoomIdRelAcc.get(r.Room__c) == null){
+               mapRoomIdRelAcc.put(r.Room__c, new List<Related_Access__c>()); 
+            }
+            
+            mapRoomIdRelAcc.get(r.Room__c).add(r);
+        }
+        
+        System.debug('room meet' + mapRoomIdMeet);
+        System.debug('room rel' + mapRoomIdRelAcc);
+        
+        for(String roomId : listRoomIds){
+            paramsUpdateSendToGallagher.addAll(new_meeting.generateUrlParam(
+                mapRoomIdMeet.get(roomId),
+                mapRoomIdRelAcc.get(roomId)
+            ));
+            
+            for(Meeting__c m : mapRoomIdMeet.get(roomId)){
+                maximoId.add(String.valueOf(m.Mx_Meeting_Id__c));
+            }
+        }
+        
+        for(Meeting__c m : toDelete){
+            paramsDeleteSendToGallagher.add('description=canceled');
+            maximoId.add(String.valueOf(m.Mx_Meeting_Id__c));
+        }
+        
         update toUpdate;
-        
-        System.debug('to delete');
-        System.debug(toDelete);
         delete toDelete;
         
-        return paramsSendToGallagher;
+        Map<String, List<String>> toReturn = new Map<String, List<String>>();
+        
+        paramsSendToGallagher.addAll(paramsCreateSendToGallagher);
+        paramsSendToGallagher.addAll(paramsUpdateSendToGallagher);
+        paramsSendToGallagher.addAll(paramsDeleteSendToGallagher);
+        
+        System.debug('params');
+        System.debug(paramsSendToGallagher);
+        
+        System.debug('maximoId');
+        System.debug(maximoId);
+        
+        toReturn.put('params', paramsSendToGallagher);
+        toReturn.put('maximoId', maximoId);
+        
+        return toReturn;
     }
     
     private static List<String> createSynchronizedMeeting(List<String> emailMeeting, List<Meeting__c> meetings){
@@ -276,13 +349,13 @@ global with sharing class calendar_component_v2 {
         for(Meeting__c g : meetings){
             roomIds.add(g.Room__c);
             
-			Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();    
+			/*Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();    
             mail.setTargetObjectId(g.Guest__c);
             mail.setTemplateId('00X28000001G2ZQ');
             mail.setSenderDisplayName('XL Meeting Invitation');
             mail.setWhatId(g.Id);
             mail.setSaveAsActivity(false);
-            Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});
+            Messaging.sendEmail(new Messaging.SingleEmailMessage[]{mail});*/
         }
         
         /**
@@ -338,24 +411,62 @@ global with sharing class calendar_component_v2 {
     }
     
     @AuraEnabled
-    public static Boolean saveToGallagher(List<String> params){
-        for(String param : params){
-            new_meeting.sendToGallagher(param, '');
-        }   
+    /**
+     * maximoIdParams = Map<maximoId, params>
+     */
+    public static Map<String, Object> updateToGallagher(List<String> params, List<String> maximoId){
+        Map<String, Object> sfmxMap = new Map<String, Object>();
+        Integer i = 0;
+        String maxId='';
         
-        return true;
+        for(String param : params){
+            if(maximoId.get(i) == '0'){
+                maxId = ''; 
+            }else{
+                maxId = maximoId.get(i);
+            }
+            String response = new_meeting.sendToGallagher(param, maxId);
+            i++;
+            
+            System.debug('response = ');
+            System.debug(response);
+            
+            if( response != ''){
+                Map<String, Object> jsonData = (Map<String, Object>)JSON.deserializeUntyped(response);
+                if((Map<String, Object>)jsonData.get('CreateVMSMEETINGResponse') != null){
+                	Map<String, Object> CreateVMSMEETINGResponse = (Map<String, Object>)jsonData.get('CreateVMSMEETINGResponse');
+                    Map<String, Object> VMSMEETINGSet = (Map<String, Object>)CreateVMSMEETINGResponse.get('VMSMEETINGSet');
+                    Map<String, Object> TALMEETING = (Map<String, Object>)VMSMEETINGSet.get('TALMEETING');
+                    Map<String, Object> Attributes = (Map<String, Object>)TALMEETING.get('Attributes');
+                    Map<String, Object> SFMEETINGID = (Map<String, Object>)Attributes.get('SFMEETINGID');
+                    Map<String, Object> MEETINGID = (Map<String, Object>)Attributes.get('MEETINGID');
+                    
+                    sfmxMap.put((String)SFMEETINGID.get('content'), MEETINGID.get('content'));    
+                }else if((Map<String, Object>)jsonData.get('SyncVMSMEETINGResponse') != null){
+                    Map<String, Object> SyncVMSMEETINGResponse = (Map<String, Object>)jsonData.get('SyncVMSMEETINGResponse');
+                    Map<String, Object> VMSMEETINGSet = (Map<String, Object>)SyncVMSMEETINGResponse.get('VMSMEETINGSet');
+                    Map<String, Object> TALMEETING = (Map<String, Object>)VMSMEETINGSet.get('TALMEETING');
+                    Map<String, Object> Attributes = (Map<String, Object>)TALMEETING.get('Attributes');
+                    Map<String, Object> SFMEETINGID = (Map<String, Object>)Attributes.get('SFMEETINGID');
+                    Map<String, Object> MEETINGID = (Map<String, Object>)Attributes.get('MEETINGID');
+                    
+                    sfmxMap.put((String)SFMEETINGID.get('content'), MEETINGID.get('content'));
+                }
+                
+            }
+        }
+        
+        return sfmxMap;
     }
     
     @AuraEnabled
-    public static List<String> updateToGallagher(List<String> params, List<String> maximoIds){
-        List<String> response = new List<String>();
-        Integer i = 0;
-        
-        for(String param : params){
-            response.add(new_meeting.sendToGallagher(param, maximoIds.get(i)));
-            i++;
+    public static Boolean updateMxMeetingId(Map<String, Object> sfmxMeetingIds){
+        List<Meeting__c> meetings = [select Id, Mx_Meeting_Id__c, Last_Updated_At__c from Meeting__c where Id in :sfmxMeetingIds.keySet()];
+        for(Meeting__c m : meetings){
+            m.Mx_Meeting_Id__c = Integer.valueOf(sfmxMeetingIds.get(m.Id));
         }
         
-        return response;
+        update meetings;
+        return true;
     }
 }
