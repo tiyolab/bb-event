@@ -1,0 +1,267 @@
+<apex:page showHeader="false" standardStylesheets="false" sidebar="false" applyHtmlTag="false" applyBodyTag="false" docType="html-5.0" controller="c_my_event_controller" action="{!validate}">
+<apex:form >
+<html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>My Event</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <apex:stylesheet value="{!URLFOR($Resource.slds, 'assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
+    <style>
+                html{
+                    background: url({!urlfor($Resource.images, '/images/background.jpg')})fixed center center no-repeat;
+                    -webkit-background-size: cover;
+                    -moz-background-size: cover;
+                    -o-background-size: cover;
+                    background-size: cover;
+        			overflow-y: auto;
+    				overflow-x: hidden;
+                }
+                
+                body{
+                	background: rgba(0,0,0,0.7);
+                    width: 100%;
+                    height: 100%;
+                    margin: 0px;
+                    padding: 0px;
+                    position: fixed;
+        			overflow-y: auto;
+    				overflow-x: hidden;
+                }
+                
+                .content-header{
+                	text-align: center;
+    				margin-top: 90px;
+                }
+                
+                .content-body{
+              		padding: 5px 100px;
+                }
+                
+                .label-content-header{
+                	font-family: arial;
+                    font-size: 32px
+                }
+                
+                .label-content-header#label-1{
+                	color: white;
+                }
+                
+                .label-content-header#label-2{
+                	color: #ff9b00;
+                }
+                
+                .clip-container{
+                	padding: 5px;
+                }
+                
+                .clip{
+                    background: rgba(255, 255, 255, 0.8) !important;
+                    color: black;
+                    padding: 15px;
+                    border-radius: 0px !important;
+                }
+                
+                .event-label, .panel-header{
+                	color: white;
+                }
+                
+                .event-name, #panel-header-2{
+                	background: #3498db;
+                }
+                
+                .event-venue, #panel-header-3{
+                	background: #e74c3c;
+                }
+                
+                .event-date{
+                	background: #f1c40f;
+                }
+                
+                .event-registration-deadline, #panel-header-1{
+                	background: #1abc9c;
+                }
+            </style>
+</head>
+<body>
+    
+  <!-- REQUIRED SLDS WRAPPER -->
+  <div class="blueberry">
+      
+      <!-- alert -->
+      <div class="slds-notify_container" style="display:{! if(showCompleteMessage || showIncompleteMessage, 'block', 'none')} !important">
+          <div class="slds-notify slds-notify--alert slds-theme--{! if(showCompleteMessage, 'success', 'alert')} slds-theme--alert-texture" role="alert">
+              <button class="slds-button slds-notify__close slds-button--icon-inverse" title="Close">
+                  <svg aria-hidden="true" class="slds-button__icon">
+                      <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                  </svg>
+                  <span class="slds-assistive-text">Close</span>
+              </button>
+              <span class="slds-assistive-text">{! if(showCompleteMessage, 'Success', 'Error')}</span>
+              <h2>
+                  <svg aria-hidden="true" class="slds-icon slds-icon--small slds-m-right--x-small">
+                      <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#ban"></use>
+                  </svg>{! if(showCompleteMessage, 'Thank you, your registration is completed.', 'Your registration is incomplete, please completed it by click url in email we have sent to yout email!')}
+              </h2>
+          </div>
+      </div>
+      
+      <div class="slds-grid slds-wrap slds-grid--pull-padded container">
+          <div class="slds-size--1-of-1 content-body">
+              <section class="stage panelSlide globalNav">
+              <!-- PRIMARY CONTENT WRAPPER -->
+                <div class="myapp">
+                    <div class="slds-grid slds-grid slds-wrap slds-grid--pull-padded">
+                        
+                        <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--4-of-12">
+                                    <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap clip">
+                                      <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                                        <div class="slds-panel__section slds-has-divider--bottom panel-header" id="panel-header-1"> 
+                                            <div class="slds-tile slds-media slds-grid slds-grid--vertical-align-center">
+                                                <div class="slds-media__figure">
+                                                  <div class="slds-icon_container">
+                                                    <svg aria-hidden="true" class="slds-icon slds-icon-standard-contact slds-icon--small">
+                                                      <use xlink:href="{!urlfor($Resource.slds, '/assets/icons/standard-sprite/svg/symbols.svg#event')}"></use>
+                                                    </svg>
+                                                    <span class="slds-assistive-text">Event</span>
+                                                  </div>
+                                                </div>
+                                                <div class="slds-media__body">
+                                                    <h3 class="slds-text-heading--medium" title="Salesforce UX">{!registrant.My_Event__r.Name}</h3>
+                                                </div>
+                                          </div>
+                                        </div>
+                                        <div class="slds-panel__section">
+                                              <h3 class="slds-text-heading--small slds-m-bottom--medium">Event Information</h3>
+                                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Starting Date</span>
+                                                <div class="slds-form-element__control">
+                                                  	<span class="slds-form-element__static">
+                                                        <apex:outputText value="{0, time, dd'/'MM'/'yyyy HH':'mm}"><apex:param value="{!registrant.My_Event__r.Start_Date__c}"/></apex:outputText>
+                                                    </span>
+                                                </div>
+                                              </div>
+                                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">End Date</span>
+                                                <div class="slds-form-element__control">
+                                                  	<span class="slds-form-element__static">
+                                                        <apex:outputText value="{0, time, dd'/'MM'/'yyyy HH':'mm}"><apex:param value="{!registrant.My_Event__r.End_Date__c}"/></apex:outputText>
+                                                    </span>
+                                                </div>
+                                              </div>
+                                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Venue Name</span>
+                                                <div class="slds-form-element__control">
+                                                  <span class="slds-form-element__static">{!registrant.My_Event__r.Venue__r.Name}</span>
+                                                </div>
+                                              </div>
+                                              <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Venue Address</span>
+                                                <div class="slds-form-element__control">
+                                                  <span class="slds-form-element__static">{!registrant.My_Event__r.Venue__r.Address__c}, {!registrant.My_Event__r.Venue__r.City__c}, {!registrant.My_Event__r.Venue__r.State_Province__c}, {!registrant.My_Event__r.Venue__r.Country__c}</span>
+                                                </div>
+                                              </div>
+                                            <div class="slds-form-element slds-hint-parent slds-has-divider--bottom">
+                                                <span class="slds-form-element__label">Venue Phone</span>
+                                                <div class="slds-form-element__control">
+                                                  <span class="slds-form-element__static">{!registrant.My_Event__r.Venue__r.Phone__c}</span>
+                                                </div>
+                                              </div>
+                                         </div>
+                                      </div>
+                                    </div>    
+                        </div>
+                        
+                        
+                        <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--5-of-12">
+                                    <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap clip">
+                                      <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                                        <div class="slds-panel__section slds-has-divider--bottom panel-header" id="panel-header-2">
+                                            <div class="slds-tile slds-media slds-grid slds-grid--vertical-align-center">
+                                                <div class="slds-media__body">
+                                                    <h3 class="slds-text-heading--medium" title="Salesforce UX">Event Session</h3>
+                                                </div>
+                                          </div>
+                                        </div>
+                                        <div class="slds-panel__section">
+                                            <ul class="slds-has-dividers--bottom-space">
+                                                <apex:repeat value="{!registrant.Registrant_Sessions__r}" var="es">
+                                                    <li class="slds-item">
+                                                        <div class="slds-tile slds-media">
+                                                          <div class="slds-media__figure"></div>
+                                                          <div class="slds-media__body">
+                                                            <h3 class="slds-truncate" title="SLDS_038.zip"><a href="javascript:void(0);">{!es.My_Event_Session__r.Name}</a></h3>
+                                                            <div class="slds-tile__detail slds-text-body--small">
+                                                              <ul class="slds-list--horizontal slds-has-dividers--right">
+                                                                  <li class="slds-item">Starting at 
+                                                                      <apex:outputText value="{0, time, dd'/'MM'/'yyyy HH':'mm}"><apex:param value="{!es.My_Event_Session__r.Start_Session__c}"/></apex:outputText>
+                                                                  </li>
+                                                                  <li class="slds-item">until 
+                                                                      <apex:outputText value="{0, time, dd'/'MM'/'yyyy HH':'mm}"><apex:param value="{!es.My_Event_Session__r.End_Session__c}"/></apex:outputText>
+                                                                  </li>
+                                                              </ul>
+                                                            </div>
+                                                          </div>
+                                                        </div>
+                                                      </li>
+                                                </apex:repeat>
+                                            </ul>
+                                        </div>
+                                      </div>
+                                    </div> 
+                        </div>
+                        
+                        
+                        <div class="slds-p-horizontal--small slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--3-of-12">
+                            <div class="slds-panel slds-grid slds-grid--vertical slds-nowrap clip">
+                                <div class="slds-form--stacked slds-grow slds-scrollable--y">
+                                    <div class="slds-panel__section slds-has-divider--bottom panel-header" id="panel-header-3">
+                                        <div class="slds-tile slds-media slds-grid slds-grid--vertical-align-center">
+                                            <div class="slds-media__body">
+                                                <h3 class="slds-text-heading--medium" title="Salesforce UX">Show Hotel 
+                                                    <apex:commandLink action="{!requestHotel}" value="->" style="color:white" reRender="x_result" onclick="showLoading()"/>
+                                                </h3>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="slds-panel__section">
+                                        <apex:outputPanel id="x_result">
+                                            <p id="label_loading" style="display:none">
+                                                Loading...
+                                            </p>
+                                            <apex:repeat value="{!hotel}" var="h">
+                                                <p>
+                                                    Name :{!hotel[h].neighborhood.name}<br/>
+                                                    Location :{!hotel[h].neighborhood.city}, {!hotel[h].neighborhood.country}, {!hotel[h].neighborhood.state}<br/>
+                                                    Kurs :{!hotel[h].currencyCode}<br/>
+                                                    Price :{!hotel[h].pricePerNight}<br/>
+                                                    Start :{!hotel[h].rating}<br/>
+                                                </p>
+                                                <br/>
+                                            </apex:repeat>
+                                            
+                                        </apex:outputPanel>
+                                        
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                    </div>
+    
+                </div>
+                <!-- / PRIMARY CONTENT WRAPPER -->
+          </section>
+          </div>
+      </div>
+  </div>
+  <!-- / REQUIRED SLDS WRAPPER -->
+	<script>
+    	function showLoading(){
+        	document.getElementById("label_loading").style.display = "block";    
+        }
+    </script>
+</body>
+</html>
+</apex:form>
+</apex:page>

@@ -1,0 +1,117 @@
+<apex:page controller="c_my_event_attachment_controller" showHeader="false" sidebar="false" standardStylesheets="false" renderAs="pdf" action="{!init}">
+    <apex:stylesheet value="{!URLFOR($Resource.report_style)}"/>
+    
+    <body>
+    	<div id="Header">
+            <table class="address-table">
+                <tr>
+                    <td>To</td>
+                    <td>:</td>
+                    <td>Director of Marketing</td>
+                </tr>
+                <tr>
+                    <td>From</td>
+                    <td>:</td>
+                    <td>Event Management</td>
+                </tr>
+                <tr>
+                    <td>Date</td>
+                    <td>:</td>
+                    <td>{!timeSend}</td>
+                </tr>
+            </table>
+        </div>
+        <div id="container">
+            <div class="label-info">
+                This page contain information about Blueberry Event that contains In Progress Event, On Going Event and Registrant that register to related event. 
+            </div>
+            <apex:pageBlock >
+                <apex:repeat value="{!myEvents}" var="status">
+                    <label class="label-title">{!status}</label>
+                    <apex:outputLabel rendered="{! if(event_size[status] > 0, false, true)}" styleClass="label-no-event">*No events available</apex:outputLabel>
+                    <apex:outputPanel rendered="{! if(event_size[status] > 0, true, false)}">
+                        <table class="my-table">
+                            <thead class="my-thead">
+                                <tr>
+                                    <th>Event Code</th>
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Venue</th>
+                                    <th>Session</th>
+                                </tr>
+                            </thead>
+                            <tbody class="my-tbody">
+                                <apex:repeat value="{!myEvents[status]}" var="me">
+                                    <tr>
+                                        <td>{!me.Id}</td>
+                                        <td>{!me.Name}</td>
+                                        <td>
+                                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                        <apex:param value="{!me.Start_Date__c}" /> 
+                                                    </apex:outputText> - 
+                                                    <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                        <apex:param value="{!me.End_Date__c}" /> 
+                                                    </apex:outputText>
+                                        </td>
+                                        <td>{!me.Venue__r.Name}</td>
+                                        <td></td>
+                                    </tr>
+                                </apex:repeat>
+                            </tbody>
+                        </table>
+                    </apex:outputPanel>
+                </apex:repeat>
+            </apex:pageBlock>
+            
+            
+            <div style="page-break-after:always;"></div>
+            
+            
+            <apex:pageBlock >
+                <apex:repeat value="{!myEvents}" var="status">
+                    <label class="label-title">{!status}</label>
+                    <apex:outputLabel rendered="{! if(event_size[status] > 0, false, true)}" styleClass="label-no-event">*No events available</apex:outputLabel>
+                    <apex:outputPanel rendered="{! if(event_size[status] > 0, true, false)}">
+                        <table class="my-table">
+                            <thead class="my-thead">
+                                <tr>
+                                    <th>Event Name</th>
+                                    <th>Registrant</th>
+                                </tr>
+                            </thead>
+                            <tbody class="my-tbody">
+                                <apex:repeat value="{!myEvents[status]}" var="me">
+                                    <tr>
+                                        <td>{!me.Name}</td>
+                                        <td>
+                                            <apex:outputLabel rendered="{! if(me.Registrants__r.size > 0, false, true)}" styleClass="label-no-event">*No Registrants available</apex:outputLabel>
+                                            <apex:outputPanel rendered="{! if(me.Registrants__r.size > 0, true, false)}">
+                                                <table class="my-table">
+                                                    <thead class="my-thead">
+                                                        <tr>
+                                                            <th>Name</th>
+                                                            <th>Email</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody class="my-tbody">
+                                                        <apex:repeat value="{!me.Registrants__r}" var="reg">
+                                                            <tr>
+                                                                <td>{!reg.Contact__r.Name}</td>
+                                                                <td>{!reg.Contact__r.Email}</td>
+                                                            </tr>
+                                                        </apex:repeat>
+                                                    </tbody>
+                                                </table>
+                                            </apex:outputPanel>
+                                        </td>
+                                    </tr>
+                                </apex:repeat>
+                            </tbody>
+                        </table>
+                    </apex:outputPanel>
+                </apex:repeat>
+            </apex:pageBlock>
+        </div>    
+    </body>
+    
+</apex:page>

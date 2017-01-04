@@ -1,0 +1,26 @@
+<apex:page docType="html-5.0" title="Hello World">
+    <style>
+        .container{
+            position:absolute;
+            width: 100%;
+            text-align:center;
+        }
+        .my-page{
+            padding: 5px;
+            text-align: center;
+            margin : 5px;
+            width : 50%;
+            position : absolute;
+            border-radius : 5px;
+            top : 5px;
+            background-color: rgb(33, 177, 97);
+            color: white;
+        }
+    </style>
+    <div class = "container">
+        <div class = "my-page">
+            Hello mobile world
+        </div>    
+    </div>
+    
+</apex:page>

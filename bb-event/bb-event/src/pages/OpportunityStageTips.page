@@ -1,0 +1,10 @@
+<apex:page standardController="Opportunity">
+    <center>
+        <h1>
+            {!IF(Opportunity.StageName = 'Prospecting', 'Get it', '')}
+            {!IF(Opportunity.StageName = 'Needs Analysis', 'Kepp Analysis', '')}
+            {!IF(Opportunity.StageName = 'Proposal/Price Quote', 'Get good price', '')}
+            {!IF(Opportunity.StageName = 'Negotiation/Review', 'Call Them', '')}
+        </h1>
+    </center>
+</apex:page>

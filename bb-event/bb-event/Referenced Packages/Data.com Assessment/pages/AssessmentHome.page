@@ -1,0 +1,355 @@
+<apex:page standardStylesheets="false" applyBodyTag="false" docType="html-5.0" sideBar="false"
+           controller="ddcAssess.AssessmentCtlr" action="{!onPageLoad}" title="Data.com Assessment" >
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        
+        <apex:stylesheet value="{!URLFOR($Resource.ddcAssess__SLDS212, 'assets/styles/salesforce-lightning-design-system-vf.css')}" />
+        <apex:stylesheet value="{!URLFOR($Resource.ddcAssess__SLDS212PLUS)}" />
+    </head>    
+    
+    <body>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
+        <script type="text/javascript" src="{!URLFOR($Resource.jquery_migrate)}"></script>
+        <script type="text/javascript" src="{!URLFOR($Resource.jquery_qtip_100_js)}"></script>
+        <script>
+        function setFocusOnLoad() {}
+        </script>
+        <script type="text/javascript">
+        function start_button() {
+            if (document.getElementById('{!$Component.theForm.new_pageblock.dunsright}').checked) {
+                $("#dialog").removeClass("slds-hide");
+            } else {
+                onPreStart();
+            }
+            return false;
+        }
+        
+        function dunsright_checkbox() {
+            document.getElementById('submit_dunsright').disabled = !(document.getElementById('dnb').checked && document.getElementById('tos').checked);
+        }
+        
+        function confirmCancel(assessmentToCancel) {
+            if(confirm("Are you sure you wish to proceed? Any assessment data collected will be lost.")) {
+                onCancel(assessmentToCancel);
+            }
+        }
+        
+        function confirmDelete(assessmentToDelete) {
+            if(confirm("Are you sure you wish to delete this assessment?")) {
+                onDelete(assessmentToDelete);
+            }
+        }
+        
+        function refreshTable() {
+            $('table.assessment_table').fadeTo("fast", 0.33).fadeTo("fast", 1);
+            onRefresh();
+        }
+        </script>
+        
+        <div class="ddcAssess">  
+            <apex:pageMessages id="page_messages" />
+            <apex:form id="theForm" styleClass="slds-form-element">
+                <apex:actionFunction name="onPreStart" rerender="page_messages, start_button" action="{!onPreStart}" oncomplete="onStart()"/>
+                <apex:actionFunction name="onStart" rerender="page_messages, start_button" action="{!onStart}" oncomplete="onRefresh()"/>
+                <apex:actionFunction name="refreshMessages" rerender="page_messages" />
+                <apex:actionFunction name="refreshTimeEstimate" rerender="time_estimate" />
+                <apex:actionFunction name="onCancel" action="{!onCancel}" rerender="assessment_pageblock, start_button_container">
+                    <apex:param name="assessmentToCancel" assignTo="{!assessmentToCancel}" value="" />
+                </apex:actionFunction>
+                <apex:actionFunction name="onDelete" action="{!onDelete}" rerender="assessment_pageblock">
+                    <apex:param name="assessmentToDelete" assignTo="{!assessmentToDelete}" value="" />
+                </apex:actionFunction>
+                <apex:actionFunction name="onRefresh" action="{!onRefresh}" rerender="assessment_pageblock, start_button_container"/>
+                
+                <div class="slds-page-header" role="banner">
+                    <div class="slds-grid">
+                        <div class="slds-col slds-has-flexi-truncate">
+                            <h1 class="slds-page-header__title slds-truncate" title="Data.com Clean Data Assessments">Data.com Clean Data Assessments</h1>
+                        </div>
+                        <div class="slds-col slds-no-flex slds-grid slds-align-top">
+                        </div>
+                    </div>
+                    <div class="slds-grid">
+                        <div class="slds-col slds-align-bottom">
+                            <p class="slds-text-body--small">Data assessments tell you how many of your organization's records we can enrich with more and better Data.com data. They
+                                also identify how many of your records can potentially be marked as "inactive" based on information in Data.com, and if you
+                                request, how many records in your Salesforce org appear to be duplicates. Your organization can request one assessment every 30
+                                days.</p>
+                        </div>
+                        <div class="slds-col slds-no-flex slds-grid slds-align-bottom">
+                            <button class="slds-button slds-m-left--xx-small slds-button--icon-border" onclick="javascript:refreshTable();return false">
+                                <img class="slds-button__icon" src="{!URLFOR($Resource.SLDS212, '/assets/icons/utility/refresh_60.png')}" alt="Refresh"/>
+                            </button>
+                            <button class="slds-button slds-m-left--xx-small slds-button--icon-border"
+                                    onclick="javascript:openPopupFocusEscapePounds('http://help.salesforce.com/HTViewHelpDoc?id=data_dot_com_clean_data_assessment.htm&language=en_US', 'Help', 1024, 768, 'width=1024,height=768,resizable=yes,toolbar=yes,status=yes,scrollbars=yes,menubar=yes,directories=no,location=yes,dependant=no', false, false);return false">
+                                <img class="slds-button__icon" src="{!URLFOR($Resource.SLDS212, '/assets/icons/utility/help_60.png')}" alt="Help for this page"/>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <apex:pageBlock id="assessment_pageblock" >
+                    <div class="inner_content">
+                        <apex:outputPanel rendered="{!NOT(hasSummaries)}">
+                            <div class="slds-m-around--x-small slds-text-body--regular">
+                                No Summaries are available. Please start an assessment below.
+                            </div>
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!hasSummaries}">
+                            <div class="slds-m-around--x-small slds-text-body--regular">Your last five requested assessments are listed here.                                                                     If you're experiencing problems with the assessment package, please 
+                                <a href="http://help.salesforce.com/HTUnauthContactSupport" target="_blank">contact Salesforce.com support</a>
+                            </div>
+                            <table class="assessment_table slds-table slds-table--bordered slds-max-medium-table--stacked-horizontal">
+                                <thead>
+                                    <tr class="slds-text-title--caps">
+                                        <th scope="col">
+                                            <div class="slds-truncate" title="Date Requested">Date Requested</div>
+                                        </th>
+                                        <th scope="col">
+                                            <div class="slds-truncate" title="Requested By">Requested By</div>
+                                        </th>
+                                        <th scope="col">
+                                            <div class="slds-truncate" title="Status">Status</div>
+                                        </th>
+                                        <th scope="col">
+                                            <div class="slds-truncate" title="Action">Action</div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <apex:repeat value="{!summaries}" var="summary">
+                                        <tr>
+                                            <th scope="row" data-label="Date Requested">
+                                                <div class="slds-truncate"> <!-- missing title -->
+                                                    <apex:outputField value="{!summary.createddate}" />
+                                                </div>
+                                            </th>
+                                            <td data-label="Requested By">
+                                                <div class="slds-truncate" title="{!summary.createdby.name}">
+                                                    <apex:outputField value="{!summary.createdby.name}" />
+                                                </div>
+                                            </td>
+                                            <td data-label="Status">
+                                                <div class="slds-truncate">
+                                                    <apex:outputPanel layout="none" rendered="{!NOT(summary.ddcAssess__Complete__c)}">
+                                                        <a href="{!$Page.Results}?id={!summary.id}&sfdc.tabName={!$CurrentPage.parameters.sfdc.tabName}" class="blue">In Progress</a> ( 
+                                                        <apex:outputPanel layout="none" rendered="{!NOT(isRecordCountComplete)}">
+                                                            &nbsp;
+                                                            <apex:repeat value="{!summary.Entity_Assessments__r}" var="entity">
+                                                                <div>
+                                                                    <apex:outputField value="{!entity.ddcAssess__Entity_Type__c}"/>s:&nbsp;<apex:outputField value="{!entity.ddcAssess__Total__c}"/>&nbsp;
+                                                                </div>
+                                                            </apex:repeat>
+                                                        </apex:outputPanel>
+                                                        <apex:outputPanel layout="none" rendered="{!isRecordCountComplete && recordCount != 0}">
+                                                            <apex:outputText value="{0, number, ###}% ">
+                                                                <apex:param value="{!((summary.ddcAssess__Total__c / recordCount) * 100)}"/>
+                                                            </apex:outputText>
+                                                        </apex:outputPanel>)
+                                                    </apex:outputPanel>
+                                                    <apex:outputPanel layout="none" rendered="{!summary.ddcAssess__Complete__c}">
+                                                        <div xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                                            <a href="{!IF(summary.version__c==null || summary.version__c==1.00, $Page.ResultV1, $Page.Results)}?id={!summary.id}&sfdc.tabName={!$CurrentPage.parameters.sfdc.tabName}" class="blue">View Assessment</a>
+                                                            <apex:outputPanel layout="none" rendered="{!NOT(summary.ddcAssess__Error_Count__c == 0)}">
+                                                                <span class="slds-icon_container" title="There were errors while running the assessment. Click for details."
+                                                                      onclick="javascript:$('#errors_{!summary.id}').removeClass('slds-hide');return false">
+                                                                    <svg aria-hidden="true" class="slds-icon slds-icon--x-small slds-icon-text-warning">
+                                                                        <use xlink:href="{!URLFOR($Resource.SLDS212, '/assets/icons/utility-sprite/svg/symbols.svg#warning')}"></use>
+                                                                    </svg>
+                                                                    <span class="slds-assistive-text">There were errors while running the assessment. Click for details.</span>
+                                                                </span>
+                                                                <article id="errors_{!summary.id}" class="slds-card slds-hide slds-text-body--small slds-text-color--error">
+                                                                    <div>
+                                                                        Errors occurred while completing the assessment:
+                                                                    </div>
+                                                                    <div>
+                                                                        {!summary.error_count__c} records failed ({!summary.Failed_pcnt__c}%)
+                                                                    </div>
+                                                                </article>
+                                                            </apex:outputPanel>
+                                                        </div>
+                                                    </apex:outputPanel>
+                                                </div>
+                                            </td>
+                                            <td data-label="Action">
+                                                <div class="slds-truncate">
+                                                    <apex:outputPanel layout="none" rendered="{!summary.ddcAssess__Complete__c}">
+                                                        <a href="#" onclick="confirmDelete('{!summary.id}')" class="blue">Delete</a>
+                                                    </apex:outputPanel>
+                                                    <apex:outputPanel layout="none" rendered="{!NOT(summary.ddcAssess__Complete__c)}">
+                                                        <a href="#" onclick="confirmCancel('{!summary.id}')">Cancel</a>
+                                                    </apex:outputPanel>
+                                                </div>
+                                            </td>
+                                        </tr> 
+                                    </apex:repeat>
+                                </tbody>
+                            </table>
+                        </apex:outputPanel>
+                    </div>
+                </apex:pageBlock> 
+                <article class="slds-card">
+                    <apex:pageBlock id="new_pageblock">
+                        <div class="inner_content">
+                            <div class="slds-card__header slds-grid">
+                                <header class="slds-media slds-media--center slds-has-flexi-truncate">
+                                    <div class="slds-media__body slds-truncate">
+                                        <h2>
+                                            <span class="slds-text-heading--small">Start New Assessment</span>
+                                        </h2>
+                                    </div>
+                                </header>
+                            </div>
+                            
+                            <div class="slds-card__body">
+                                <div class="slds-card__body--inner">
+                                    <div class="slds-text-body--regular">
+                                        Define your preferences, then start your data assessment.
+                                    </div>
+                                    
+                                    <div id="time_estimate" class="slds-box slds-theme--default">
+                                        <apex:outputPanel id="time_estimate">
+                                            <span class="slds-text-body--regular">
+                                                Estimated Completion Time:&nbsp;
+                                            </span>
+                                            <apex:outputPanel rendered="{!NOT(isRecordCountComplete)}" layout="none">
+                                                <span class="slds-text-title--caps">
+                                                    Calculating...
+                                                </span>
+                                            </apex:outputPanel>
+                                            <apex:outputPanel rendered="{!isRecordCountComplete}" layout="none">
+                                                <span class="slds-text-title--caps">{!IF(timeEstimate == 1,'<','')} {!timeEstimate} hour{!IF(timeEstimate > 1,'s','')}</span>
+                                            </apex:outputPanel>
+                                        </apex:outputPanel>
+                                    </div>
+                                </div>
+                                <div class="slds-card__body--inner slds-m-top--medium">
+                                    <h2 class="slds-has-divider--top-space slds-text-heading--small">Duplicate Check</h2>
+                                    <p class="slds-text-body--regular slds-m-around--medium">Duplicate check tells you how many account, contact, and lead records in your org are likely duplicates. Duplicate check
+                                        temporarily consumes data storage in your Salesforce organization (2 KB per unique record).</p>
+                                    <div class="setup_checkbox slds-checkbox slds-m-horizontal--medium">
+                                        <apex:inputCheckbox id="dupe_check" value="{!dupeCheck}" selected="true"/>
+                                        <label class="slds-checkbox__label" for="{!$Component.theForm.new_pageblock.dupe_check}">
+                                            <span class="slds-checkbox--faux"></span>
+                                            <span class="slds-form-element__label">Yes, check for duplicates.</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <h2 class="slds-has-divider--top-space slds-text-heading--small">DUNSRight&#8482; Match</h2>
+                                    <p class="slds-text-body--regular slds-m-around--medium">Does your organization have a lot of international accounts? Use DUNSRight&#8482; Match, a key feature in Data.com 
+                                        Prospector and Data.com Clean, to improve match results. DUNSRight&#8482; Match requires more time, about 24 hours,
+                                        to complete your assessment.</p>
+                                    <div class="setup_checkbox slds-checkbox slds-m-horizontal--medium">
+                                        <apex:inputCheckbox id="dunsright" value="{!dunsright}" onclick="refreshTimeEstimate();" selected="true" />
+                                        <label class="slds-checkbox__label" for="{!$Component.theForm.new_pageblock.dunsright}">
+                                            <span class="slds-checkbox--faux"></span>
+                                            <span class="slds-form-element__label">Yes, include DUNSRight&#8482; Match results.</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <h2 class="slds-has-divider--top-space slds-text-heading--small">Notifications</h2>
+                                    <p class="slds-text-body--regular slds-m-around--medium">When your assessment is done, we can also send an email notification to you and anyone else you designate.</p>
+                                    <div class="slds-form-element slds-m-horizontal--medium">
+                                        <label class="slds-form-element__label" for="email_recipients">Email recipients (separate addresses with commas)</label>
+                                        <div class="slds-form-element__control">
+                                            <apex:inputTextArea id="email_recipients" value="{!emailRecipients}" rows="2" cols="50" styleClass="slds-textarea"/>
+                                        </div>
+                                    </div>                                
+                                </div>
+                                <div class="slds-card__footer slds-align--absolute-center slds-m-top--medium">
+                                    <apex:outputPanel id="start_button_container" styleClass="slds-text-align--center">
+                                        <div>
+                                            
+                                            <apex:commandButton value="Start My Assessment" onclick="start_button()" immediate="true" disabled="{!hasError}"
+                                                                id="start_button" reRender="none" styleClass="slds-button slds-button--brand"/>
+                                            <apex:outputPanel id="error_messages" layout="none">
+                                                <apex:outputPanel id="assessment_in_progress_error" rendered="{!assessmentInProgress}">
+                                                    <div xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                                        <span class="slds-icon_container" title="Warning">
+                                                            <svg aria-hidden="true" class="slds-icon slds-icon-text-warning">
+                                                                <use xlink:href="{!URLFOR($Resource.SLDS212, '/assets/icons/utility-sprite/svg/symbols.svg#warning')}"></use>
+                                                            </svg>
+                                                            <span class="slds-assistive-text">An assessment is already in progress.</span>
+                                                        </span>
+                                                        An assessment is already in progress.
+                                                    </div>
+                                                </apex:outputPanel>
+                                            </apex:outputPanel>
+                                        </div>
+                                    </apex:outputPanel>
+                                </div>
+                            </div>
+                        </div>
+                    </apex:pageBlock>
+                </article>
+                <div id="dialog" class="slds-hide" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                    <div role="dialog" tabindex="-1" aria-labelledby="confirmHeader" class="slds-modal slds-fade-in-open">
+                        <div class="slds-modal__container">
+                            <div class="slds-modal__header">
+                                <h2 id="confirmHeader" class="slds-text-heading--small">Confirm DUNSRight&#8482; Match</h2>
+                            </div>
+                            <div class="slds-modal__content slds-p-around--medium">
+                                <div>
+                                    <div class="slds-text-body--regular slds-m-horizontal--medium slds-icon-text-warning">
+                                        <span class="slds-icon_container" title="Warning">
+                                            <svg aria-hidden="true" class="slds-icon slds-icon-text-warning">
+                                                <use xlink:href="{!URLFOR($Resource.SLDS212, '/assets/icons/utility-sprite/svg/symbols.svg#warning')}"></use>
+                                            </svg>
+                                            <span class="slds-assistive-text">Please review and agree to the following information.</span>
+                                        </span>
+                                        Please review and agree to the following information.
+                                    </div>
+                                    <p class="slds-text-body--regular slds-m-around--medium">
+                                        Note that, at a minimum, the following data will be transmitted to Dun &amp; Bradstreet in order to obtain match results:
+                                        Account Name, Address, and Phone. No information identifying the Customer or any particular Users as the entity or
+                                        individuals who are making requests shall be transmitted to Dun &amp; Bradstreet.</p>
+                                    <div class="setup_checkbox slds-checkbox slds-m-horizontal--medium">
+                                        <input type="checkbox" id="dnb" name="dnb" onclick="dunsright_checkbox()" /> 
+                                        <label class="slds-checkbox__label" for="dnb">
+                                            <span class="slds-checkbox--faux"></span>
+                                            <span class="slds-form-element__label">Dun &amp; Bradstreet (as opposed to salesforce.com)
+                                                is the provider of the functionality that you are enabling and any use is solely between you and Dun &amp; Bradstreet, as further
+                                                described in the Terms of Service referenced below. This functionality is NOT warranted by salesforce.com and salesforce.com shall
+                                                not be responsible for any performance-related issues or decrease in functionality. You and/or other users at your company may be
+                                                able to use this functionality to access your company's data in the Salesforce system. However, using this application may also result in
+                                                transmission of such data out of the Salesforce system. To the extent data is transmitted out of the Salesforce system, salesforce.com
+                                                is not responsible for the privacy, security or integrity of that data.</span>
+                                        </label>
+                                    </div>
+                                    <div class="setup_checkbox slds-checkbox slds-m-horizontal--medium slds-m-top--medium">
+                                        <input type="checkbox" id="tos" name="tos" onclick="dunsright_checkbox()" />
+                                        <label class="slds-checkbox__label" for="tos">
+                                            <span class="slds-checkbox--faux"></span>
+                                            <span class="slds-form-element__label">I have read and agreed to 
+                                                Dun &amp; Bradstreet's DUNSRight&nbsp;
+                                                <a href="http://www.salesforce.com/assets/pdf/misc/salesforce_DB_DUNSRight_service_terms.pdf" target="_blank">terms of service</a>.</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="slds-modal__footer">
+                                <button class="slds-button slds-button--neutral" onclick="javascript:$('#dialog').addClass('slds-hide');return false;">Cancel</button>
+                                <button id="submit_dunsright" class="slds-button slds-button--neutral slds-button--brand" onclick="javascript:onPreStart();$('#dialog').addClass('slds-hide');return false" disabled="true">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slds-backdrop slds-backdrop--open"></div>            
+                </div>
+            </apex:form>
+        </div>    
+        <script type="text/javascript">
+        var timer = setInterval(function() {
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.AssessmentCtlr.getIsRecordCountComplete}',
+                function(result, event) {
+                    if (result) {
+                        clearInterval(timer);
+                        refreshTimeEstimate();
+                    }
+                });
+        }, 2000);
+        </script>
+    </body>
+</apex:page>

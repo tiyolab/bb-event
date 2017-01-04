@@ -1,0 +1,102 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false">
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en">
+        <head>
+            <meta charset="utf-8" />
+            <meta http-equiv="x-ua-compatible" content="ie=edge" />
+            <title>Blueberry Events</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <apex:stylesheet value="{!URLFOR($Resource.slds, 'assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
+            
+            <style>
+                html{
+                    background: url({!urlfor($Resource.images, '/images/background.jpg')})fixed center center no-repeat;
+                    -webkit-background-size: cover;
+                    -moz-background-size: cover;
+                    -o-background-size: cover;
+                    background-size: cover;
+                	overflow-y: auto;
+    				overflow-x: hidden;
+                }
+                
+                body{
+                	background: rgba(0,0,0,0.7);
+                    width: 100%;
+                    height: 100%;
+                    margin: 0px;
+                    padding: 0px;
+                    position: fixed;
+                	overflow-y: auto;
+    				overflow-x: hidden;
+                }
+                
+                .content-header{
+                	text-align: center;
+    				margin-top: 90px;
+                }
+                
+                .content-body{
+              		padding: 50px 100px;
+                }
+                
+                .label-content-header{
+                	font-family: arial;
+                    font-size: 32px
+                }
+                
+                .label-content-header#label-1{
+                	color: white;
+                }
+                
+                .label-content-header#label-2{
+                	color: #ff9b00;
+                }
+                
+                .clip-container{
+                	padding: 5px;
+                }
+                
+                .clip{
+                    background: rgba(255, 255, 255, 0.8);
+                    color: black;
+                	padding: 15px;
+                }
+                
+                .event-label{
+                	color: white;
+                }
+                
+                .event-name{
+                	background: #3498db;
+                }
+                
+                .event-venue{
+                	background: #e74c3c;
+                }
+                
+                .event-date{
+                	background: #f1c40f;
+                }
+                
+                .event-registration-deadline{
+                	background: #1abc9c;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="blueberry">
+                <div class="slds-notify_container">
+                  <div class="slds-notify slds-notify--alert slds-theme--alert-texture" role="alert">
+                    <button class="slds-button slds-notify__close slds-button--icon-inverse" title="Close">
+                      <svg aria-hidden="true" class="slds-button__icon">
+                        <use xlink:href="/assets/icons/utility-sprite/svg/symbols.svg#close"></use>
+                      </svg>
+                      <span class="slds-assistive-text">Close</span>
+                    </button>
+                    <span class="slds-assistive-text">Info</span>
+                    <h2>Thank you for registration. We will send email confirmation to you soon.</h2>
+                  </div>
+                </div>
+            </div>
+        </body>
+    </html>
+</apex:page>

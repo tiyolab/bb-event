@@ -1,0 +1,98 @@
+<apex:page controller="c_my_event_attachment_controller" action="{!init}" renderAs="pdf">
+    <apex:pageBlock >
+            <apex:panelGrid > 
+                <apex:repeat value="{!myEvents}" var="status">
+                    <apex:pageBlockSection columns="1" title="{!status}">
+                        <apex:pageBlockSectionItem >
+                            <apex:panelGroup >
+                                <label>*Registrant list attachment.</label>
+                                <table border="1">
+                                <tr>
+                                    <th class="event_code">Event Code</th>
+                                    <th class="event_name">Event</th>
+                                    <th class="event_date">Date</th>
+                                    <th class="event_venue">Venue</th>
+                                    <th class="event_session">Session</th>
+                                </tr>
+                                <apex:repeat value="{!myEvents[status]}" var="me">
+                                    <tr>
+                                        <td>{!me.Id}</td>
+                                        <td>{!me.Name}</td>
+                                        <td>
+                                            <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                <apex:param value="{!me.Start_Date__c}" /> 
+                                            </apex:outputText> - 
+                                            <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                <apex:param value="{!me.End_Date__c}" /> 
+                                            </apex:outputText>
+                                        </td>
+                                        <td>{!me.Venue__r.Name}</td>
+                                        <td>
+                                            <table border="1" style="display:{!if(me.My_Event_Sessions__r.size > 0, 'block', 'none')}">
+                                                <tr>
+                                                    <th>Session</th>
+                                                    <th>Time</th>
+                                                </tr>
+                                                <apex:repeat value="{!me.My_Event_Sessions__r}" var="mes">
+                                                <tr>
+                                                     <td>{!mes.Name}</td>
+                                                     <td>
+                                                         <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                            <apex:param value="{!mes.Start_Session__c}" /> 
+                                                        </apex:outputText> - 
+                                                        <apex:outputText value="{0,date,MM'/'dd'/'yyyy}">
+                                                            <apex:param value="{!mes.End_session__c}" /> 
+                                                        </apex:outputText>
+                                                    </td>
+                                                </tr>    
+                                                </apex:repeat>
+                                            </table>
+                                            <label style="display:{!if(me.My_Event_Sessions__r.size == 0, 'block', 'none')}">-</label>
+                                        </td>
+                                    </tr>
+                                </apex:repeat>
+                            </table>
+                            </apex:panelGroup>
+                        </apex:pageBlockSectionItem>
+                    </apex:pageBlockSection>
+                </apex:repeat>
+        	</apex:panelGrid>
+    </apex:pageBlock>
+    <div style="page-break-after:always;"></div>
+    <apex:pageBlock >
+        <apex:repeat value="{!myEvents}" var="status">
+            <apex:pageBlockSection columns="1" title="{!status}">
+                <apex:pageBlockSectionItem >
+                    <apex:panelGroup >
+                        <table border="1">
+                            <tr>
+                                <th>Event Name</th>
+                                <th>Registrant</th>
+                            </tr>
+                            <apex:repeat value="{!myEvents[status]}" var="me">
+                            <tr>
+                                <td>{!me.Name}</td>
+                                <td>
+                                    <label style="display:{!if(me.Registrants__r.size == 0, 'block', 'none')}">-</label>
+                                    <table border="1" style="display:{!if(me.Registrants__r.size > 0, 'block', 'none')}">
+                                        <tr>
+                                            <th>Registrant Name</th>
+                                        	<th>Registrant Email</th>
+                                        </tr>
+                                        <apex:repeat value="{!me.Registrants__r}" var="reg">
+                                      	<tr>
+                                            <td>{!reg.Contact__r.Name}</td>
+                                        	<td>{!reg.Contact__r.Email}</td>
+                                        </tr>
+                                        </apex:repeat>
+                                    </table>
+                                </td>
+                           	</tr>
+                            </apex:repeat>
+                        </table>
+                    </apex:panelGroup>
+                </apex:pageBlockSectionItem>
+            </apex:pageBlockSection>
+        </apex:repeat>
+    </apex:pageBlock>
+</apex:page>

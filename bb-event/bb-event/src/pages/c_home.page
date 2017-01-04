@@ -1,0 +1,154 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" controller="c_home_controller">
+    <apex:form >
+    <html xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" lang="en">
+        <head>
+            <meta charset="utf-8" />
+            <meta http-equiv="x-ua-compatible" content="ie=edge" />
+            <title>Blueberry Events</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <apex:stylesheet value="{!URLFOR($Resource.slds, 'assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
+            
+            <style>
+                html{
+                    background: url({!urlfor($Resource.images, '/images/background.jpg')})fixed center center no-repeat;
+                    -webkit-background-size: cover;
+                    -moz-background-size: cover;
+                    -o-background-size: cover;
+                    background-size: cover;
+                	overflow-y: auto;
+    				overflow-x: hidden;
+                }
+                
+                body{
+                	background: rgba(0,0,0,0.7);
+                    width: 100%;
+                    height: 100%;
+                    margin: 0px;
+                    padding: 0px;
+                    position: fixed;
+                	overflow-y: auto;
+    				overflow-x: hidden;
+                }
+                
+                .content-header{
+                	text-align: center;
+    				margin-top: 90px;
+                }
+                
+                .content-body{
+              		padding: 50px 100px;
+                }
+                
+                .label-content-header{
+                	font-family: arial;
+                    font-size: 32px
+                }
+                
+                .label-content-header#label-1{
+                	color: white;
+                }
+                
+                .label-content-header#label-2{
+                	color: #ff9b00;
+                }
+                
+                .clip-container{
+                	padding: 5px;
+                }
+                
+                .clip{
+                    background: rgba(255, 255, 255, 0.8);
+                    color: black;
+                	padding: 15px;
+                }
+                
+                .event-label{
+                	color: white;
+                	padding: 5px;
+                }
+                
+                .event-name{
+                	background: #3498db;
+                }
+                
+                .event-venue{
+                	background: #e74c3c;
+                }
+                
+                .event-date{
+                	background: #f1c40f;
+                }
+                
+                .event-registration-deadline{
+                	background: #1abc9c;
+                }
+                
+                .my-input-text{
+                	width: 50% !important;
+                    border-radius: 0px !important;
+                    margin: 0 5px !important;
+                    float: right !important;
+                }
+                
+                .my-button{
+                	border-radius: 0px !important;
+                    float: right !important;
+                    margin: 0px 5px !important;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="blueberry">
+                
+                <header class="slds-global-header_container"><a href="javascript:void(0);" class="slds-assistive-text slds-assistive-text--focus">Skip to Navigation</a><a href="javascript:void(0);" class="slds-assistive-text slds-assistive-text--focus">Skip to Main Content</a>
+                  <div class="slds-global-header slds-grid slds-grid--align-spread">
+                    <div class="slds-global-header__item">
+                      <div class="slds-global-header__logo">
+                        <img src="{!urlfor($Resource.slds, '/assets/images/logo-noname.svg')}" alt="" />
+                      </div>
+                    </div>
+                      <div class="slds-global-header__item">
+                          <apex:pageMessages id="error_message"/>
+                      </div>
+                    <div class="slds-global-header__item slds-global-header__item--search">
+                      <div class="slds-form-element slds-lookup">
+                          <apex:commandButton value="Log in" action="{!login}" styleClass="slds-button slds-button--brand my-button" />
+                          <apex:inputText value="{!bookingCode}" styleClass="slds-input my-input-text" html-placeholder="Booking Code"/>
+                      </div>
+                    </div>
+                  </div>
+                </header>
+                
+                <div class="slds-grid slds-wrap slds-grid--pull-padded container">
+                    <div class="slds-size--1-of-1 content-header">
+                        <label id="label-1" class="label-content-header">Get Closer By</label><label id="label-2" class="label-content-header"> Join Our Event</label>
+                    </div>
+               		<div class="slds-size--1-of-1 content-body">
+                 		<div class="slds-grid slds-wrap slds-grid--pull-padded">
+                            <apex:repeat value="{!events}" var="e">
+                                <div class="slds-size--1-of-{!sizeMin} slds-medium-size--1-of-{!sizeMedium} slds-large-size--1-of-{!sizeLarge} clip-container">
+                                    <div class="clip">
+                                        <label class="event-name event-label">{!e.Name}</label>
+                                        <label class="event-venue event-label"> {!e.Venue__r.City__c}, {!e.Venue__r.Country__c}.</label> We will start
+                                        <label class="event-date event-label"> on 
+                                            <apex:outputText value="{0, date, dd'/'MM'/'yyyy}"><apex:param value="{!e.Start_Date__c}"/></apex:outputText> until 
+                                            <apex:outputText value="{0, date, dd'/'MM'/'yyyy}"><apex:param value="{!e.End_Date__c}"/></apex:outputText>.</label> Limited place.
+                                        <label class="event-registration-deadline event-label"> Registration available until 
+                                        <apex:outputText value="{0, date, dd'/'MM'/'yyyy}"><apex:param value="{!e.Registration_Deadline__c}"/></apex:outputText></label>
+                                        <a class="slds-button" href="{!urlfor('c_detail?id=' + e.Id)}"> Detail...</a>
+                                    </div>
+                                </div>
+                            </apex:repeat>
+                        </div>       
+                    </div>     
+                </div> 
+            </div>
+        </body>
+        <script>
+        	function display_error_message(){
+                //var msg = document.getElementById('error_message').value;
+            }
+        </script>
+    </html>
+    </apex:form>
+</apex:page>

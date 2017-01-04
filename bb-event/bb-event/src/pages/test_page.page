@@ -1,0 +1,7 @@
+<apex:page controller="test_page_controller" action="{!init}">
+    <apex:form >
+        {!profileName}
+        <apex:inputText value="{!lastName}"/>
+        <apex:commandButton action="{!test}" value="change"/>
+    </apex:form>
+</apex:page>
