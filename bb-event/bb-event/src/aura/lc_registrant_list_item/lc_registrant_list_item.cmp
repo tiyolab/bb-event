@@ -1,0 +1,26 @@
+<aura:component controller="lc_registrant_lists_controller">
+    <aura:attribute name="registrant" type="Registrant__c"/>
+    	<tr class="slds-hint-parent">
+          <td role="gridcell" data-label="Account Name">
+              <div class="slds-truncate" title="Cloudhub">
+                  <ui:outputURL label="{!v.registrant.Contact__r.LastName + ', ' +v.registrant.Contact__r.FirstName}"
+                                click="{!c.detail}"/>
+              </div>
+          </td>
+          <td role="gridcell" data-label="Close Date">
+            <div class="slds-truncate" title="4/14/2015">{!v.registrant.My_Event__r.Name}</div>
+          </td>
+          <td role="gridcell" data-label="Prospecting">
+            <div class="slds-truncate" title="Prospecting">{!v.registrant.Registration_Status__c}</div>
+          </td>
+          <td role="gridcell" class="slds-cell-shrink" data-label="Select row Cloudhub">
+            <label class="slds-checkbox">
+              <ui:inputCheckbox click="{!c.cancel}"
+                                value="{!if(v.registrant.Status__c=='Canceled', true, false)}"
+                                disabled="{!if(v.registrant.Status__c=='Canceled', true, false)}"/>
+              <span class="slds-checkbox--faux"></span>
+              <span class="slds-assistive-text">Select row Cloudhub</span>
+            </label>
+          </td>
+        </tr>
+</aura:component>

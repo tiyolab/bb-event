@@ -1,0 +1,86 @@
+<aura:component controller="lc_registrant_lists_controller" implements="force:appHostable">
+    <aura:attribute name="registrants" type="Registrant__c[]"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    
+    <table class="slds-table slds-table--bordered slds-table--fixed-layout" role="grid">
+      <thead>
+        <tr class="slds-text-title--caps">
+          <th class="slds-is-sortable slds-is-resizable" scope="col" aria-label="Opportunity Name">
+            <a href="javascript:void(0);" class="slds-th__action slds-text-link--reset">
+              <span class="slds-assistive-text">Sort </span>
+              <span class="slds-truncate" title="Opportunity Name">Registrant Name</span>
+              <div class="slds-icon_container">
+                
+              </div>
+              <span class="slds-assistive-text" aria-live="assertive" aria-atomic="true"></span>
+            </a>
+            <div class="slds-resizable">
+              <label for="cell-resize-handle-210" class="slds-assistive-text">Registrant Name column width</label>
+              <input class="slds-resizable__input slds-assistive-text" type="range" min="20" max="1000" id="cell-resize-handle-210" />
+              <span class="slds-resizable__handle">
+                <span class="slds-resizable__divider"></span>
+              </span>
+            </div>
+          </th>
+          <th class="slds-is-sortable slds-is-resizable" scope="col" aria-label="Account Name">
+            <a href="javascript:void(0);" class="slds-th__action slds-text-link--reset">
+              <span class="slds-assistive-text">Sort </span>
+              <span class="slds-truncate" title="Account Name">Event Name</span>
+              <div class="slds-icon_container">
+                
+              </div>
+              <span class="slds-assistive-text" aria-live="assertive" aria-atomic="true"></span>
+            </a>
+            <div class="slds-resizable">
+              <label for="cell-resize-handle-211" class="slds-assistive-text">Event Name column width</label>
+              <input class="slds-resizable__input slds-assistive-text" type="range" min="20" max="1000" id="cell-resize-handle-211" />
+              <span class="slds-resizable__handle">
+                <span class="slds-resizable__divider"></span>
+              </span>
+            </div>
+          </th>
+          <th class="slds-is-sortable slds-is-resizable" scope="col" aria-label="Close Date">
+            <a href="javascript:void(0);" class="slds-th__action slds-text-link--reset">
+              <span class="slds-assistive-text">Sort </span>
+              <span class="slds-truncate" title="Close Date">Registration Status</span>
+              <div class="slds-icon_container">
+                
+              </div>
+              <span class="slds-assistive-text" aria-live="assertive" aria-atomic="true"></span>
+            </a>
+            <div class="slds-resizable">
+              <label for="cell-resize-handle-212" class="slds-assistive-text">Registration Status column width</label>
+              <input class="slds-resizable__input slds-assistive-text" type="range" min="20" max="1000" id="cell-resize-handle-212" />
+              <span class="slds-resizable__handle">
+                <span class="slds-resizable__divider"></span>
+              </span>
+            </div>
+          </th>
+          <th class="slds-cell-shrink" scope="col">
+            <a href="javascript:void(0);" class="slds-th__action slds-text-link--reset">
+              <span class="slds-assistive-text">Sort </span>
+              <span class="slds-truncate" title="Close Date">Cancel</span>
+              <div class="slds-icon_container">
+                
+              </div>
+              <span class="slds-assistive-text" aria-live="assertive" aria-atomic="true"></span>
+            </a>
+            <div class="slds-resizable">
+              <label for="cell-resize-handle-212" class="slds-assistive-text">Cancel column width</label>
+              <input class="slds-resizable__input slds-assistive-text" type="range" min="20" max="1000" id="cell-resize-handle-212" />
+              <span class="slds-resizable__handle">
+                <span class="slds-resizable__divider"></span>
+              </span>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <aura:iteration items="{!v.registrants}" var="r">
+            
+        <c:lc_registrant_list_item registrant="{!r}"></c:lc_registrant_list_item>
+            
+        </aura:iteration>
+      </tbody>
+    </table>
+</aura:component>

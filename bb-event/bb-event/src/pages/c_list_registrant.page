@@ -1,0 +1,7 @@
+<apex:page standardController="Registrant__c" recordSetVar="registrants" >
+    <apex:pageBlock >
+        <apex:pageBlockTable value="{!registrants}" var="r">
+            <apex:column value="{!r.Contact__r.LastName}, {!r.Contact__r.FirstName}"/>
+        </apex:pageBlockTable>
+    </apex:pageBlock>
+</apex:page>
